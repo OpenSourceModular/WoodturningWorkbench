@@ -1,9 +1,10 @@
-import FreeCAD, Path, math, json, os
+import FreeCAD as App 
+import FreeCADGui as Gui
 from PySide import QtGui, QtCore
 from FreeCAD import Vector
 import Part
 import Sketcher
-import FreeCADGui
+
 
 class BowlConstructionLines:
 	def GetResources(self):
@@ -16,12 +17,12 @@ class BowlConstructionLines:
 
 	def IsActive(self):
 		"""Check if the command is active"""
-		return FreeCAD.ActiveDocument is not None
+		return App.ActiveDocument is not None
 
 	def Activated(self):
 		"""Execute the command"""
 		class AddBowlConstructionLines:
-			import FreeCAD, Path, math, json, os
+			
 			from PySide import QtGui, QtCore
 			from FreeCAD import Vector
 			import Part
@@ -110,23 +111,22 @@ class BowlConstructionLines:
 			def bt_generate_lines_click(self):
 				print("Generating Lines")
 				self.update_values()
-				import FreeCAD as App
-				import FreeCADGui as Gui
 				
 				# Get the active document
 				doc = App.activeDocument()
 				if not doc:
 					show_message("Error", "No active document. Please open a document first.")
 					return
-				# Get the active sketch
-				#sketch = None
-				#sketch = Gui.ActiveDocument.getInEdit().Object
-
-				sketch = doc.addObject('Sketcher::SketchObject', 'BowlProfileSketch')
-				sketch.Placement = FreeCAD.Placement(FreeCAD.Vector(0, 0, 0), FreeCAD.Rotation(FreeCAD.Vector(1, 0, 0), 90))
-				sketch.MapMode = "Deactivated"					
-			
-				self.list_of_points = []
+				
+				sketch = doc.getObject("BowlProfileSketch")
+				
+				if sketch == None:
+					sketch = doc.addObject('Sketcher::SketchObject', 'BowlProfileSketch')
+					sketch.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(App.Vector(1, 0, 0), 90))
+					sketch.MapMode = "Deactivated"					
+					print("Creating New Sketch")
+				
+					self.list_of_points = []
 				a_point = sketch.addGeometry(Part.Point(App.Vector(self.bowl_radius/2, 0, 0)), False)
 				self.list_of_points.append(a_point) 
 				sketch.addConstraint(Sketcher.Constraint('PointOnObject', a_point, 1, -1)) 
@@ -141,6 +141,7 @@ class BowlConstructionLines:
 					print(line_idx)
 					sketch.addConstraint(Sketcher.Constraint('Horizontal', line_idx))
 					z = sketch.addConstraint(Sketcher.Constraint('DistanceY', -1, 1 , line_idx, 1, self.layer_height * i))
+					sketch.addConstraint(Sketcher.Constraint('PointOnObject', line_idx, 1, -2))
 					a_point = sketch.addGeometry(Part.Point(App.Vector((self.bowl_radius/2)+i*5, y_position, 0)), False)
 					self.list_of_points.append(a_point) 
 					sketch.addConstraint(Sketcher.Constraint('PointOnObject', a_point, 1, line_idx))
@@ -156,19 +157,20 @@ class BowlConstructionLines:
 					show_message("Error", "No active document. Please open a document first.")
 					return
 				# Get the active sketch
-				sketch = None
-				sketch = Gui.ActiveDocument.getInEdit().Object
+
+				sketch = doc.getObject("BowlProfileSketch")
 				geoList = []
 				for i, geo in enumerate(sketch.Geometry):
 					# Print information about the geometry
 					print(f"  Element index {i}: {geo.TypeId}")
 					geoList.append(i)
+				geoList.sort()
 				geoList.reverse()
 				for i in geoList:	
 					sketch.delGeometry(i)
 
-
-				#self.list_of_points = []	
+				doc.recompute()
+					
 				
 			def closeEvent(self, event):
 				print("closing")
@@ -182,8 +184,8 @@ class BowlConstructionLines:
 			panel = AddBowlConstructionLines()
 	
 			# Show the task panel in FreeCAD
-			FreeCADGui.Control.showDialog(panel)
+			Gui.Control.showDialog(panel)
 
 
 		except Exception as e:
-			FreeCAD.Console.PrintError(f"Error adding construction lines: {str(e)}\n")
+			App.Console.PrintError(f"Error adding construction lines: {str(e)}\n")

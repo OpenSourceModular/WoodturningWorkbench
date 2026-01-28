@@ -5,8 +5,8 @@ AddSegments.py - Command to add segments to a bowl design
 import math
 from pydoc import doc
 from unicodedata import name
-import FreeCAD
-import FreeCADGui
+import FreeCAD as App
+import FreeCADGui as Gui
 from FreeCAD import Vector
 from math import cos, sin, pi, radians, tan
 import PySide.QtGui
@@ -16,9 +16,7 @@ import Part
 import Draft
 from BOPTools import BOPFeatures
 
-
 class AddSegments:
-	
 	
 	def GetResources(self):
 		"""Return the command resources"""
@@ -30,7 +28,7 @@ class AddSegments:
 
 	def IsActive(self):
 		"""Check if the command is active"""
-		return FreeCAD.ActiveDocument is not None
+		return App.ActiveDocument is not None
 
 	def Activated(self):
 		"""Execute the command"""
@@ -46,7 +44,7 @@ class AddSegments:
 				self.bowl_height = 254.0  # Bowl height in mm
 				self.bowl_radius = 127.0  # Bowl radius in mm
 				self.layer_height = 19.05 # Layer height in mm
-				self.fudge = 6.35  # Fudge factor in mm
+				self.fudge = 4  # Fudge factor in mm
 				self.wall_thickness = 18.0  # Wall thickness in mm
 				self.list_of_segment_names = []
 
@@ -61,43 +59,23 @@ class AddSegments:
 				title_label.setFont(title_font)
 				layout.addWidget(title_label)
 
-				num_segments_layout = QtWidgets.QHBoxLayout()
+				text_box_layout = QtWidgets.QVBoxLayout()
 				num_segments_label = QtWidgets.QLabel("Number of Segments:")
-				num_segments_label.setMinimumWidth(150)
 				self.num_segments_input = QtWidgets.QLineEdit()
 				self.num_segments_input.setText(str(self.number_of_segments))
-				self.num_segments_input.setPlaceholderText("Enter number of segments")
-				num_segments_layout.addWidget(num_segments_label)
-				num_segments_layout.addWidget(self.num_segments_input)
-				layout.addLayout(num_segments_layout)
-
-				fudge_layout = QtWidgets.QHBoxLayout()
-				fudge_label = QtWidgets.QLabel("Fudge Factor:")
-				fudge_label.setMinimumWidth(150)
 				self.fudge_input = QtWidgets.QLineEdit()
-				self.fudge_input.setText("0")
-				self.fudge_input.setPlaceholderText("Enter fudge factor")
-				fudge_layout.addWidget(fudge_label)
-				fudge_layout.addWidget(self.fudge_input)
-				layout.addLayout(fudge_layout)
-				num_segments_layout.addWidget(self.num_segments_input)
-				layout.addLayout(num_segments_layout)
-
+				self.fudge_input.setText(str(self.fudge))
 				wall_thickness_layout = QtWidgets.QHBoxLayout()
 				wall_thickness_label = QtWidgets.QLabel("Wall Thickness:")
-				wall_thickness_label.setMinimumWidth(150)
 				self.wall_thickness_input = QtWidgets.QLineEdit()
-				self.wall_thickness_input.setText("19.05")
-				self.wall_thickness_input.setPlaceholderText("Enter wall thickness")
-				wall_thickness_layout.addWidget(wall_thickness_label)
-				wall_thickness_layout.addWidget(self.wall_thickness_input)
-				layout.addLayout(wall_thickness_layout)
-				fudge_layout.addWidget(fudge_label)
-				fudge_layout.addWidget(self.fudge_input)
-				layout.addLayout(fudge_layout)
-				num_segments_layout.addWidget(self.num_segments_input)
-				layout.addLayout(num_segments_layout)
-
+				self.wall_thickness_input.setText(str(self.wall_thickness))
+				text_box_layout.addWidget(num_segments_label)
+				text_box_layout.addWidget(self.num_segments_input)
+				text_box_layout.addWidget(wall_thickness_label)
+				text_box_layout.addWidget(self.wall_thickness_input)
+				text_box_layout.addWidget(QtWidgets.QLabel("Fudge Factor:"))
+				text_box_layout.addWidget(self.fudge_input)
+				layout.addLayout(text_box_layout)
 
 		# Add spacing
 				layout.addSpacing(20)
@@ -115,47 +93,55 @@ class AddSegments:
 				self.delete_bowl_outlines_button.clicked.connect(self.bt_delete_bowl_outlines_click)
 				button_layout.addWidget(self.delete_bowl_outlines_button)
 
+				button_layout2 = QtWidgets.QHBoxLayout()
+				# Add Bowl Solid button
+				self.add_bowl_solid_button = QtWidgets.QPushButton("Add Bowl Solid")
+				self.add_bowl_solid_button.clicked.connect(self.bt_add_bowl_solid_click)
+				button_layout2.addWidget(self.add_bowl_solid_button)
+
+				# Delete Bowl Solid button
+				self.delete_bowl_solid_button = QtWidgets.QPushButton("Delete Bowl Solid")
+				self.delete_bowl_solid_button.clicked.connect(self.bt_delete_bowl_solid_click)
+				button_layout2.addWidget(self.delete_bowl_solid_button)
+
+				button_layout3 = QtWidgets.QHBoxLayout()
 				# Add Segments button
 				self.add_segments_button = QtWidgets.QPushButton("Add Segments")
 				self.add_segments_button.clicked.connect(self.bt_add_segments_click)
-				button_layout.addWidget(self.add_segments_button)
+				button_layout3.addWidget(self.add_segments_button)
 
 				# Delete Segments button
 				self.delete_segments_button = QtWidgets.QPushButton("Delete Segments")
 				self.delete_segments_button.clicked.connect(self.bt_delete_segments_click)
-				button_layout.addWidget(self.delete_segments_button)
+				button_layout3.addWidget(self.delete_segments_button)
 
-				button2_layout = QtWidgets.QHBoxLayout()
-				
+				button_layout4 = QtWidgets.QHBoxLayout()
+	
+				self.intersect_segments_button = QtWidgets.QPushButton("Intersect Segments")
+				self.intersect_segments_button.clicked.connect(self.bt_intersect_segments_click)
+				button_layout4.addWidget(self.intersect_segments_button)
+
 				# Array segments around ring button
 				self.array_segments_button = QtWidgets.QPushButton("Array Segments Around Ring")
 				self.array_segments_button.clicked.connect(self.bt_array_segments_click)
-				button2_layout.addWidget(self.array_segments_button)
+				button_layout4.addWidget(self.array_segments_button)				
 
-				# Delete Segments button
-				self.delete_segments_button = QtWidgets.QPushButton("Delete Segments")
-				self.delete_segments_button.clicked.connect(self.bt_delete_segments_click)
-				button2_layout.addWidget(self.delete_segments_button)
-
-				self.intersect_segments_button = QtWidgets.QPushButton("Intersect Segments")
-				self.intersect_segments_button.clicked.connect(self.bt_intersect_segments_click)
-				button2_layout.addWidget(self.intersect_segments_button)
-
-				button3_layout = QtWidgets.QHBoxLayout()	
+				button_layout5 = QtWidgets.QHBoxLayout()	
 				# Cancel button
 				self.cancel_button = QtWidgets.QPushButton("Close")
 				self.cancel_button.clicked.connect(self.on_cancel)
-				button3_layout.addWidget(self.cancel_button)
+				button_layout5.addWidget(self.cancel_button)
 
 				layout.addLayout(button_layout)
-				layout.addLayout(button2_layout)
-				layout.addLayout(button3_layout)
+				layout.addLayout(button_layout2)
+				layout.addLayout(button_layout3)
+				layout.addLayout(button_layout4)
+				layout.addLayout(button_layout5)
 				
 				# Add stretch at end
 				layout.addStretch()
 				
 				self.form.setLayout(layout)
-
 
 			def set_tooltips(self):
 				self.bowl_numSegmentsBox.setToolTip("Number of segments around the bowl")
@@ -169,13 +155,185 @@ class AddSegments:
 				self.fudge = float(self.fudge_input.text())
 				self.wall_thickness = float(self.wall_thickness_input.text())
 				#self.layer_height = float(self.bowl_layer_heightBox.text())
+			
+			def	bt_add_bowl_solid_click(self):
+				print("Adding Bowl Solid")
+				#import FreeCAD as App
+				#import FreeCADGui as Gui    
+				self.update_values()
+				"""Create a BSpline from all point geometries in the selected sketch."""
+				doc = App.activeDocument()
+				if not doc:
+					print("Error: No active document. Open a document first.")
+					return
+
+				sel = Gui.Selection.getSelection()
+				if not sel:
+					print("Error: No object selected. Select a sketch and try again.")
+					return
+
+				obj = sel[0]
+				if obj.TypeId != 'Sketcher::SketchObject':
+					print(f"Error: Selected object '{obj.Name}' is not a sketch (TypeId={obj.TypeId}).")
+					return
+
+				sketch = obj
+
+				# Collect point geometries
+				poles = []
+				for i, geo in enumerate(sketch.Geometry):
+					if getattr(geo, 'TypeId', '') == 'Part::GeomPoint':
+						# geo.X, geo.Y, geo.Z contain the coordinates of the sketch point
+						poles.append(Vector(geo.X, geo.Y, geo.Z))
+
+				if not poles:
+					print(f"No point geometries found in sketch '{sketch.Name}'.")
+					return
+
+				if len(poles) < 2:
+					print("Need at least 2 points to create a BSpline.")
+					return
+
+				# Build BSpline curve from poles
+				try:
+					curve = Part.BSplineCurve()
+					curve.buildFromPoles(poles)
+					shape = curve.toShape()
+				except Exception as e:
+					print(f"Failed to build BSpline: {e}")
+					return
+
+				# Create Part::Feature to hold the result
+				obj_name = f"BSpline_from_{sketch.Name}"
+				bs_obj = doc.addObject("Part::Feature", obj_name)
+				bs_obj.Label = obj_name
+				bs_obj.Shape = shape
+
+				# Try to align placement with the sketch
+				try:
+					if hasattr(sketch, 'Placement'):
+						bs_obj.Placement = sketch.Placement
+				except Exception:
+					pass
+
+				# Create lines from each end of the BSpline to x = 0 (same y,z)
+				try:
+					# shape.Vertexes[0] and [-1] correspond to the start and end vertices of the edge
+					start_pt = shape.Vertexes[0].Point
+					end_pt = shape.Vertexes[-1].Point
+
+					target_start = Vector(0, start_pt.y, start_pt.z)
+					target_end = Vector(0, end_pt.y, end_pt.z)
+
+					edge1 = Part.makeLine(start_pt, target_start)
+					edge2 = Part.makeLine(end_pt, target_end)
+
+					line1 = doc.addObject("Part::Feature", obj_name + "_endline1")
+					line1.Label = obj_name + "_endline1"
+					line1.Shape = edge1
+					# match placement so the lines align with the sketch/BSpline
+					try:
+						if hasattr(sketch, 'Placement'):
+							line1.Placement = sketch.Placement
+					except Exception:
+						pass
+
+					line2 = doc.addObject("Part::Feature", obj_name + "_endline2")
+					line2.Label = obj_name + "_endline2"
+					line2.Shape = edge2
+					try:
+						if hasattr(sketch, 'Placement'):
+							line2.Placement = sketch.Placement
+					except Exception:
+						pass
+				except Exception as e:
+					print(f"Warning: failed to create end lines: {e}")
+				a_compound = doc.addObject("Part::Compound","Compound")
+				doc.Compound.Links = [bs_obj,line1,line2]
+
+				a_revolve = doc.addObject("Part::Revolution","Revolve")
+				doc.Revolve.Source = a_compound
+				doc.Revolve.Axis = (0.0,0.0,1.0)
+				#doc.Revolve.Base = (1.23456789,2.34567891,3.45678912)
+				doc.Revolve.Angle = 360.0
+				doc.Revolve.Solid = False
+				doc.Revolve.AxisLink = None
+				doc.Revolve.Symmetric = False
+				doc.Compound.Visibility = False
+
+				# Ensure the document is up-to-date so the revolve has a computed shape
+				try:
+					doc.recompute()
+				except Exception:
+					pass
+
+				print(a_revolve)
+
+				# Convert the revolve to a solid and hide the original revolve
+				try:
+					if not hasattr(a_revolve, 'Shape') or a_revolve.Shape is None:
+						raise ValueError("Revolve has no shape. Recompute may have failed or source is invalid.")
+					faces = a_revolve.Shape.Faces
+					if not faces:
+						raise ValueError("Revolve shape contains no faces; cannot build shell.")
+					shell = Part.Shell(faces)
+					solid = Part.Solid(shell)
+					solid_obj = doc.addObject("Part::Feature", a_revolve.Name + "_solid")
+					solid_obj.Label = a_revolve.Name + " (Solid)"
+					solid_obj.Shape = solid
+					try:
+						doc.recompute()
+						a_revolve.Visibility = False
+						doc.removeObject(a_revolve.Name)
+						doc.removeObject("Compound")
+						for obj in doc.Objects:
+							if obj.Name.startswith("BSpline_from_"):
+								doc.removeObject(obj.Name)
+					except:
+						print("Could not remove revolve object after solid conversion.")
+				except Exception as e:
+					print(f"Warning: failed to convert revolve to solid: {e}")
+				a_shape = solid_obj.Shape
+				faces_list = a_shape.Faces
+				print(f"Revolve solid has {len(faces_list)} faces.")
+				a_face = faces_list[0]
+				highest_face = -1.0
+				for i, face in enumerate(faces_list):
+					print(f"Face {i}: Type = {face.ShapeType}, Area = {face.Area}")
+					print(f"Bounding Box: {face.BoundBox.Center.z}")
+					z_height = face.BoundBox.Center.z
+					if (z_height > highest_face):
+						highest_face = z_height
+						a_face = face
+						print(f" New highest face: {i} at Z={z_height}")
+				print(a_face)
+				a_thickness = doc.addObject("Part::Thickness","BowlSolid")
+				doc.BowlSolid.Faces = (solid_obj,['Face3',])
+				doc.BowlSolid.Value = -self.wall_thickness
+				solid_obj.Visibility = False
+				a_thickness.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,0,1),90))
+				a_thickness.ViewObject.Transparency = 50
+
+				doc.recompute()				
+
+			def	bt_delete_bowl_solid_click(self):
+				print("Deleting Bowl Solid")
+				doc = App.ActiveDocument
+				if doc:
+					for obj in doc.Objects:
+						if "BowlSolid" in obj.Name:
+							doc.removeObject(obj.Name)
+						if "Revolve" in obj.Name:
+							doc.removeObject(obj.Name)
+					else:
+						print("No active document found.")
 
 			def	bt_intersect_segments_click(self):
-				import FreeCAD as App
-				doc = FreeCAD.ActiveDocument		
+				
+				doc = App.ActiveDocument		
 				print("Intersecting Segments")
 				bowl_solid_objs = []
-				for obj in FreeCAD.ActiveDocument.Objects:
+				for obj in doc.Objects:
 					if "BowlSolid" in obj.Name:
 						bowl_solid_objs.append(obj)
 				
@@ -187,7 +345,7 @@ class AddSegments:
 				bowl_solid = bowl_solid_objs[0]
 
 				segment_objs = []
-				for obj in FreeCAD.ActiveDocument.Objects:
+				for obj in doc.Objects:
 					if "Segment" in obj.Name:
 						segment_objs.append(obj)
 				
@@ -208,9 +366,9 @@ class AddSegments:
 				doc.recompute()
 				for a in range(0,len(intersection_list)):
 					print("Making solid:", intersection_list[a])
-					p= App.ActiveDocument.getObject(intersection_list[a]).Shape.Faces
+					p= doc.getObject(intersection_list[a]).Shape.Faces
 					p = Part.Solid(Part.Shell(p))
-					o = App.ActiveDocument.addObject("Part::Feature","Common013_solid")
+					o = doc.addObject("Part::Feature","Common013_solid")
 					o.Label="Intersect(Solid)_001"
 					o.Shape=p
 					del p, o 
@@ -223,8 +381,6 @@ class AddSegments:
 				doc.recompute()
 
 			def bt_add_bowl_outlines_click(self):
-				import FreeCAD as App
-				import FreeCADGui as Gui
 				self.update_values()
 				"""Create a BSpline from all point geometries in the selected sketch."""
 				doc = App.activeDocument()
@@ -275,7 +431,7 @@ class AddSegments:
 
 				new_copy = App.ActiveDocument.copyObject(bs_obj, True)
 				new_copy.Label = "Bowl_Outline"
-				new_copy.Placement = FreeCAD.Placement(FreeCAD.Vector(-self.wall_thickness,0,0),FreeCAD.Rotation(FreeCAD.Vector(1,0,0),90))
+				new_copy.Placement = App.Placement(App.Vector(-self.wall_thickness,0,0),App.Rotation(App.Vector(1,0,0),90))
 				doc.recompute()
 				# Try to align placement with the sketch
 				try:
@@ -286,9 +442,9 @@ class AddSegments:
 			
 			def make_segment(self, num_segments=12, radius=50, trapezoid_height=19.05, z_level=0,extrude_height=10, solid_bottom=True):
 				from math import cos, sin, pi, radians, tan
-				import FreeCADGui as Gui
-				doc = FreeCAD.ActiveDocument
-				angle = 180 / num_segments
+				self.update_values
+				doc = App.ActiveDocument
+				angle = 180 / self.bowl_num_segments
 
 				left_top = -((radius * tan(radians(angle))))
 				right_top = (radius * tan(radians(angle)))
@@ -304,24 +460,22 @@ class AddSegments:
 					y_bottom = 0
 
 				vertices = [
-					FreeCAD.Vector(left_bottom, y_bottom, z_level),
-					FreeCAD.Vector(right_bottom, y_bottom, z_level),
-					FreeCAD.Vector(right_top, y_top, z_level),
-					FreeCAD.Vector(left_top, y_top, z_level),
-					FreeCAD.Vector(left_bottom, y_bottom, z_level)
+					App.Vector(left_bottom, y_bottom, z_level),
+					App.Vector(right_bottom, y_bottom, z_level),
+					App.Vector(right_top, y_top, z_level),
+					App.Vector(left_top, y_top, z_level),
+					App.Vector(left_bottom, y_bottom, z_level)
 				]
 				wire = Part.makePolygon(vertices)
 				face = Part.Face(wire)
-				shape = face.extrude(FreeCAD.Vector(0, 0, extrude_height))
+				shape = face.extrude(App.Vector(0, 0, extrude_height))
 
 				obj = doc.addObject("Part::Feature", f"Segment_000")
 				
 				obj.Shape = shape
 				return obj.Name
 			def bt_rotate_segments_click(self):
-				doc = FreeCAD.ActiveDocument
-				import FreeCAD as App
-				import Draft
+				doc = App.ActiveDocument
 				rotate_angle = 15
 				for name in self.list_of_segment_names:
 					print(name)
@@ -337,12 +491,12 @@ class AddSegments:
 		
 		
 			def bt_add_segments_click(self):
-				doc = FreeCAD.ActiveDocument
+				doc = App.ActiveDocument
 				print("Adding Segments")
 				self.update_values()
 				#fudge = 6.35
 				#wall_thickness = 18
-				selection = FreeCADGui.Selection.getSelection()
+				selection = Gui.Selection.getSelection()
 				if not selection:
 					print("Error: No object selected. Please select a sketch.")
 					return
@@ -355,108 +509,72 @@ class AddSegments:
 					# Check if the geometry is a point
 					if geo.TypeId == 'Part::GeomPoint':
 						point_count += 1
-						list_of_points.append(FreeCAD.Vector(geo.X, geo.Y, geo.Z))
+						list_of_points.append(App.Vector(geo.X, geo.Y, geo.Z))
 						#print(geo.X)
 				triple_list = []
 				max_x =0
 				min_x =0
-				if False:
-					for b in range(len(list_of_points)):
-						if (b<len(list_of_points)-2): # Not the last point
-							bottom = list_of_points[b].x
-							top = list_of_points[b+1].x
-							max_x = max(bottom, top, list_of_points[b+2].x)
-							min_x = min(bottom, top)
-							triple_list.append((max_x, min_x, list_of_points[b+1].x))
-						elif (b<len(list_of_points)-1): # Second to last point
-							bottom = list_of_points[b].x
-							top = list_of_points[b+1].x
-							max_x = max(bottom, top)
-							min_x = min(bottom, top)
-							triple_list.append((max_x, min_x, top))
-						else: # Last point
-							bottom = list_of_points[b].x
-							top = list_of_points[b].x
-							max_x = max(bottom, top)
-							min_x = min(bottom, top)
-							triple_list.append((max_x, min_x, max_x))
+				
+				for b in range(len(list_of_points)-1):
+					l = list_of_points[b].x-self.wall_thickness
+					m = list_of_points[b].x
+					n = list_of_points[b+1].x-self.wall_thickness
+					o = list_of_points[b+1].x
+					print(f"b={b} l={l} m={m} n={n} o={o}")
+					max_x = max(l, m, n, o)
+					min_x = min(l, m, n, o)
+					seg_length = max_x - min_x
 
-						seg_length = max_x - min_x - self.fudge
+					a_name = self.make_segment(num_segments=self.number_of_segments, radius=max_x+self.fudge, trapezoid_height=seg_length+(2*self.fudge), z_level=list_of_points[b].y, extrude_height=list_of_points[b+1].y-list_of_points[b].y, solid_bottom=False)
 
-
-						if (b==0):
-							#a_name = self.make_segment(num_segments=self.bowl_num_segments, radius=max_x+self.fudge, trapezoid_height=self.wall_thickness+(2*self.fudge), z_level=list_of_points[b].y, extrude_height=list_of_points[1].y, solid_bottom=True)
-							a_name = self.make_segment(num_segments=self.bowl_num_segments, radius=max_x+self.fudge, trapezoid_height=seg_length, z_level=list_of_points[b].y, extrude_height=list_of_points[1].y, solid_bottom=True)
-						else:
-							a_name = self.make_segment(num_segments=self.bowl_num_segments, radius=max_x+self.fudge, trapezoid_height=self.wall_thickness+(2*self.fudge), z_level=list_of_points[b].y, extrude_height=list_of_points[b].y-list_of_points[b-1].y, solid_bottom=False)
-							#a_name = self.make_segment(num_segments=self.bowl_num_segments, radius=max_x+self.fudge, trapezoid_height=seg_length, z_level=list_of_points[b].y, extrude_height=list_of_points[b].y-list_of_points[b-1].y, solid_bottom=False)
-						obj = doc.getObject(a_name)
-						obj.ViewObject.Transparency = 45
-						obj.Placement = FreeCAD.Placement(FreeCAD.Vector(0,0,0),FreeCAD.Rotation(FreeCAD.Vector(0,0,1),-90))
-						self.list_of_segment_names.append(a_name)
-
-				if True:
-					for b in range(len(list_of_points)-1):
-						l = list_of_points[b].x-self.wall_thickness
-						m = list_of_points[b].x
-						n = list_of_points[b+1].x-self.wall_thickness
-						o = list_of_points[b+1].x
-						print(f"b={b} l={l} m={m} n={n} o={o}")
-						max_x = max(l, m, n, o)
-						min_x = min(l, m, n, o)
-						seg_length = max_x - min_x
-
-						a_name = self.make_segment(num_segments=self.number_of_segments, radius=max_x+self.fudge, trapezoid_height=seg_length+(2*self.fudge), z_level=list_of_points[b].y, extrude_height=list_of_points[b+1].y-list_of_points[b].y, solid_bottom=False)
-
-						obj = doc.getObject(a_name)
-						obj.ViewObject.Transparency = 45
-						obj.Placement = FreeCAD.Placement(FreeCAD.Vector(0,0,0),FreeCAD.Rotation(FreeCAD.Vector(0,0,1),-90))
-						self.list_of_segment_names.append(a_name)
-			
+					obj = doc.getObject(a_name)
+					obj.ViewObject.Transparency = 45
+					obj.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,0,1),-90))
+					self.list_of_segment_names.append(a_name)
+		
 			def bt_array_segments_click(self):
-				doc = FreeCAD.ActiveDocument
+				doc = App.ActiveDocument
 				print("Arraying Segments Around Ring")
 				self.update_values()
-				import FreeCAD as App
-				for obj in FreeCAD.ActiveDocument.Objects:
+				ring_num = 1
+				for obj in doc.Objects:
 					if "Intersect" in obj.Label:
-						print(obj.Name)
-						
-						for i in range(1, self.number_of_segments):
-							obj.Label = f"Ring_001_Segment_{i:02d}"
-							angle = i * (360 / self.number_of_segments)
-							another_obj = App.ActiveDocument.copyObject(obj, True)
+						an_obj = doc.getObject(obj.Name)
+						an_obj.Label =f"Ring_{ring_num:0{3}d}_001"						
+						for i in range(1, self.bowl_num_segments):
+							angle = i * (360 / self.bowl_num_segments)
+							another_obj = App.ActiveDocument.copyObject(an_obj, True)
 							another_obj.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,0,1),angle))
-							another_obj.Label = f"Ring_001_Segment_{i:02d}"
-
+							another_obj.Label = f"Ring_{ring_num:0{3}d}_002"
+						ring_num += 1
 				doc.recompute()
 
 
 			def bt_delete_segments_click(self):
 				
 				print("Deleting Segments")
-				if FreeCAD.ActiveDocument:
+				if App.ActiveDocument:
 					print("Objects in the active document:")
-					for obj in FreeCAD.ActiveDocument.Objects:
+					for obj in App.ActiveDocument.Objects:
 						print(f"Name: {obj.Name}, Label: {obj.Label}")
 						if "Segment" in obj.Name:
-							FreeCAD.ActiveDocument.removeObject(obj.Name)
+							App.ActiveDocument.removeObject(obj.Name)
 					else:
 						print("No active document found.")
 			def bt_delete_bowl_outlines_click(self):
 				
 				print("Deleting Bowl Outlines")
-				if FreeCAD.ActiveDocument:
+				if App.ActiveDocument:
 					print("Objects in the active document:")
-					for obj in FreeCAD.ActiveDocument.Objects:
+					for obj in App.ActiveDocument.Objects:
 						print(f"Name: {obj.Name}, Label: {obj.Label}")
 						if "Bowl_Outline" in obj.Label:
-							FreeCAD.ActiveDocument.removeObject(obj.Name)
+							App.ActiveDocument.removeObject(obj.Name)
 					else:
 						print("No active document found.")
 			def on_cancel(self):
 				"""Cancel and close the task panel"""
-				FreeCADGui.Control.closeDialog()
+				Gui.Control.closeDialog()
 		
 			def accept(self):
 				"""Accept method (required by task panel)"""
@@ -474,8 +592,8 @@ class AddSegments:
 			panel = AddSegmentsTaskPanel()
 	
 			# Show the task panel in FreeCAD
-			FreeCADGui.Control.showDialog(panel)
+			Gui.Control.showDialog(panel)
 
 
 		except Exception as e:
-			FreeCAD.Console.PrintError(f"Error adding segments: {str(e)}\n")
+			App.Console.PrintError(f"Error adding segments: {str(e)}\n")

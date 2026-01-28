@@ -38,7 +38,7 @@ class AddCatenaryCurve:
 
 			sketch.addProperty("App::PropertyInteger", "Sag", "Dimensions").Sag=250
 			sketch.addProperty("App::PropertyFloat", "XStart", "Dimensions").XStart=0.0
-			sketch.addProperty("App::PropertyFloat", "XEnd", "Dimensions").XEnd=200.0
+			sketch.addProperty("App::PropertyFloat", "XEnd", "Dimensions").XEnd=300.0
 			sketch.addProperty("App::PropertyFloat", "YStart", "Dimensions").YStart=0.0
 			sketch.addProperty("App::PropertyInteger", "NumPoints", "Dimensions").NumPoints=50
 			
