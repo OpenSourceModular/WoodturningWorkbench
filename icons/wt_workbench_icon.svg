@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="64"
+   height="64"
+   viewBox="0 0 16.933328 16.933328"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="woodturning_workbench_icon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="11.588215"
+     inkscape:cx="31.583811"
+     inkscape:cy="31.799547"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showgrid="false" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="opacity:0.869061;fill:#000000;stroke:#000080;stroke-width:0.2"
+       d="M 2.3973708,13.653598 4.4357948,6.0460955 6.2439322,5.0021669 8.2547401,12.506605 7.5567613,12.909583 5.9975437,7.0905044 4.8628895,7.7455973 3.2628461,13.717041 Z"
+       id="path1" />
+    <path
+       style="opacity:0.869061;fill:#000000;stroke:#000080;stroke-width:0.2"
+       d="m 4.3837637,6.0505075 6.5873833,3.8032274 -1.5243429,5.6889251 1.0453379,0.280097 1.081415,-4.035895 1.368418,-0.790057 0.87945,3.282151 1.074206,-0.620193 L 13.496244,8.4361802 6.2559964,4.8632379 Z"
+       id="path2" />
+    <path
+       style="opacity:0.869061;fill:#000000;stroke:#000080;stroke-width:0.2"
+       d="M 4.3609318,5.9820111 V 3.5846403 L 6.5189459,2.3387102 8.6855661,3.5896089 6.3678519,4.927742 v 2.1958742 z"
+       id="path3" />
+    <path
+       style="opacity:0.869061;fill:#000000;stroke:#000080;stroke-width:0.2"
+       d="M 6.4386531,4.9089021 4.27728,3.6610329"
+       id="path4" />
+    <path
+       style="opacity:0.869061;fill:#1a1a1a;stroke:#000080;stroke-width:0.2"
+       d="M 6.4386531,7.0551198 8.5643584,5.8278434 V 3.6759687 l -2.052421,1.1849658 z"
+       id="path5" />
+    <ellipse
+       style="opacity:0.869061;fill:#f9f9f9;stroke:#000080;stroke-width:0.2"
+       id="path6"
+       cx="7.6030903"
+       cy="5.31988"
+       rx="0.31964946"
+       ry="0.47947419" />
+    <path
+       style="opacity:0.869061;fill:#f9f9f9;stroke:#000080;stroke-width:0.2"
+       d="M 11.735701,9.315498 11.849862,7.1921126 12.489161,6.7126384 12.329336,9.0871772 Z"
+       id="path8" />
+    <path
+       style="opacity:0.869061;fill:#f9f9f9;stroke:#000080;stroke-width:0.2"
+       d="M 11.758533,9.315498 10.753921,8.6761991 10.913745,7.3976015 10.228782,7.077952 l 0.09133,-0.9132842 1.552583,0.9817806 z"
+       id="path9" />
+    <path
+       style="opacity:0.869061;fill:#1a1a1a;stroke:#000080;stroke-width:0.2"
+       d="M 10.297279,6.0505075 10.868081,5.6623616 12.580489,6.62131 11.849862,7.1692803 Z"
+       id="path10" />
+    <ellipse
+       style="opacity:0.869061;fill:#1a1a1a;stroke:#000080;stroke-width:0.2"
+       id="path11"
+       cx="12.31792"
+       cy="7.2491927"
+       rx="0.39956179"
+       ry="0.76487547" />
+  </g>
+</svg>
