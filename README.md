@@ -4,7 +4,7 @@ A FreeCAD workbench with tools for wood turners.
 
 ## Installation
 
-1. Copy the `SampleWorkbench` folder to your FreeCAD Mod directory:
+1. Copy the `WoodTurningWorkbench` folder to your FreeCAD Mod directory:
    - Windows: `%APPDATA%\FreeCAD\Mod\`
    - Linux: `~/.FreeCAD/Mod/`
    - macOS: `~/Library/Preferences/FreeCAD/Mod/`
@@ -19,7 +19,14 @@ A FreeCAD workbench with tools for wood turners.
 Creates a new sketch with a horizontal lines and points on the line. The user moves the points to define the profile of the bowl
 
 ### Add Segments
-This task uses the selected sketch from the Add Construction Lines command. The user can define the bowl wall width as well as a "fudge" amount to give extra width to the segment.
+This task uses the selected sketch from the Add Construction Lines command. The user can define the bowl wall width as well as a "fudge" amount to give extra width to the segment. 
+Steps:
+   Show Bowl lines shows the walls of the bowl based on the curve you drew in the Bowl Profile Sketch
+   Add Segments will add segments to the model based on the curve and the text box settings.
+   You can delete the segments and make changes to the text box values and re-draw the segments until you are satisfied
+   Pressing the Make Bowl Solid button will create a FreeCAD solid shape that represents the shape of the bowl
+   Pressing the intersect button will intersect each of the segments with the bowl solid which will show what the segments look like after turning.
+   Pressing the Array button will create copies of the segments and turn them into a full ring.
 
 ## Usage
 
