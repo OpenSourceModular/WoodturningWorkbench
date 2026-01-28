@@ -1,6 +1,6 @@
-# SampleWorkbench
+# WoodTuring Tools
 
-A FreeCAD workbench with two commands: Add Box Sketch and Add Sphere.
+A FreeCAD workbench with tools for wood turners.
 
 ## Installation
 
@@ -15,11 +15,11 @@ A FreeCAD workbench with two commands: Add Box Sketch and Add Sphere.
 
 ## Commands
 
-### Add Box Sketch
-Creates a new sketch with a rectangular shape (100x100 mm) in the XY plane.
+### Add Construction Lines
+Creates a new sketch with a horizontal lines and points on the line. The user moves the points to define the profile of the bowl
 
-### Add Sphere
-Adds a sphere with a radius of 50 mm to the document.
+### Add Segments
+This task uses the selected sketch from the Add Construction Lines command. The user can define the bowl wall width as well as a "fudge" amount to give extra width to the segment.
 
 ## Usage
 
