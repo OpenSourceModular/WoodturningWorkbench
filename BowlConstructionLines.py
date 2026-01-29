@@ -1,3 +1,4 @@
+from pathlib import Path
 import FreeCAD as App 
 import FreeCADGui as Gui
 from PySide import QtGui, QtCore
@@ -9,6 +10,8 @@ import Sketcher
 class BowlConstructionLines:
 	def GetResources(self):
 		"""Return the command resources"""
+		from pathlib import Path
+		#image = str(Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "BowlConstructionLines.svg")
 		return {
 			'Pixmap': '',  # You can add an icon path here
 			'MenuText': 'Add Bowl Profile Points',
@@ -66,9 +69,7 @@ class BowlConstructionLines:
 				self.bt_generate_lines.clicked.connect(self.bt_generate_lines_click)
 				self.bt_delete_lines.clicked.connect(self.bt_delete_lines_click)
 
-				#QtCore.QObject.connect(self.bt_generate_lines, QtCore.SIGNAL("pressed()"), self.bt_generate_lines_click)
-				#QtCore.QObject.connect(self.bt_delete_lines, QtCore.SIGNAL("pressed()"), self.bt_delete_lines_click)
-
+				
 				self.bowl_heightBox = QtGui.QLineEdit(str(self.bowl_height))
 				self.bowl_radiusBox = QtGui.QLineEdit(str(self.bowl_radius))
 				self.layer_heightBox = QtGui.QLineEdit(str(self.layer_height))
@@ -86,7 +87,8 @@ class BowlConstructionLines:
 				self.construction_lines_radio.setChecked(True)
 				layout.addWidget(self.layer_heightBox)
 				layout.addWidget(self.bt_generate_lines)		
-				layout.addWidget(self.bt_delete_lines)	
+				layout.addWidget(self.bt_delete_lines)
+
 
 				self.form.setLayout(layout)	
 				#self.setLayout(layout)
@@ -171,8 +173,8 @@ class BowlConstructionLines:
 					sketch.delGeometry(i)
 
 				doc.recompute()
-					
-				
+
+	
 			def closeEvent(self, event):
 				print("closing")
 			

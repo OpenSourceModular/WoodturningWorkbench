@@ -181,10 +181,21 @@ class AddSegments:
 
 				# Collect point geometries
 				poles = []
+				list_of_points = []
+				self.list_of_segment_names = []  
 				for i, geo in enumerate(sketch.Geometry):
-					if getattr(geo, 'TypeId', '') == 'Part::GeomPoint':
-						# geo.X, geo.Y, geo.Z contain the coordinates of the sketch point
-						poles.append(Vector(geo.X, geo.Y, geo.Z))
+					# Check if the geometry is a point
+					if geo.TypeId == 'Part::GeomPoint':
+						#point_count += 1
+						list_of_points.append(App.Vector(geo.X, geo.Y, geo.Z))
+						print(geo.Y)
+				list_of_points.sort(key=lambda v: v.y)
+				for item in list_of_points:
+					poles.append(item)
+				#for i, geo in enumerate(sketch.Geometry):
+				#	if getattr(geo, 'TypeId', '') == 'Part::GeomPoint':
+				#		# geo.X, geo.Y, geo.Z contain the coordinates of the sketch point
+				#	poles.append(Vector(geo.X, geo.Y, geo.Z))
 
 				if not poles:
 					print(f"No point geometries found in sketch '{sketch.Name}'.")
@@ -510,7 +521,8 @@ class AddSegments:
 					if geo.TypeId == 'Part::GeomPoint':
 						point_count += 1
 						list_of_points.append(App.Vector(geo.X, geo.Y, geo.Z))
-						#print(geo.X)
+						print(geo.Y)
+				list_of_points.sort(key=lambda v: v.y)
 				triple_list = []
 				max_x =0
 				min_x =0
