@@ -64,6 +64,32 @@ class NewXYSketch:
 		except Exception as e:
 			FreeCAD.Console.PrintError(f"Error adding sphere: {str(e)}\n")
 
+class AddVase:
+
+	def GetResources(self):
+		"""Return the command resources"""
+		return {
+			'Pixmap': '',  # You can add an icon path here
+			'MenuText': 'Add Vase',
+			'ToolTip': 'Add a vase'
+		}
+
+	def IsActive(self):
+		"""Check if the command is active"""
+		return FreeCAD.ActiveDocument is not None
+
+	def Activated(self):
+		"""Execute the command"""
+		try:
+			from freecad import module_io
+			from pathlib import Path
+			doc = FreeCAD.ActiveDocument
+			image = str(Path(__file__).parent / 'Vase.svg')
+			module_io.OpenInsertObject("FreeCADGui", image, "insert", "Unnamed")
+			FreeCAD.Console.PrintMessage("Vase added\n")
+		except Exception as e:
+			FreeCAD.Console.PrintError(f"Error adding vase: {str(e)}\n")
+
 class AddSphere:
 	"""Command to add a sphere"""
 
@@ -110,11 +136,13 @@ class AddSphere:
 
 # Register commands at module level with error handling
 try:
+	FreeCADGui.addCommand('BowlConstructionLines', BowlConstructionLines())
+	FreeCADGui.addCommand('AddSegments', AddSegments())
 	FreeCADGui.addCommand('AddCatenaryCurve', AddCatenaryCurve())
 	FreeCADGui.addCommand('NewXYSketch', NewXYSketch())
 	FreeCADGui.addCommand('AddSphere', AddSphere())
-	FreeCADGui.addCommand('BowlConstructionLines', BowlConstructionLines())
-	FreeCADGui.addCommand('AddSegments', AddSegments())
+	FreeCADGui.addCommand('AddVase', AddVase())
+	
 	FreeCADGui.addCommand('MakeBowlSolid', MakeBowlSolid())
 except Exception as e:
 	FreeCAD.Console.PrintError(f"Error registering commands: {str(e)}\n")
@@ -130,8 +158,8 @@ class WoodturningWorkbench(FreeCADGui.Workbench):
 		"""Initialize the workbench"""
 		# Add commands to toolbar and menu
 		
-		self.appendToolbar("Woodturning Tools", ["AddCatenaryCurve", "NewXYSketch", "AddSegments", "BowlConstructionLines", "MakeBowlSolid"])
-		self.appendMenu("Woodturning Tools	", ["AddCatenaryCurve", "NewXYSketch", "AddSegments", "BowlConstructionLines", "MakeBowlSolid"])
+		self.appendToolbar("Woodturning Tools", ["BowlConstructionLines", "AddSegments", "AddCatenaryCurve", "NewXYSketch", "AddVase" ])
+		self.appendMenu("Woodturning Tools	", ["BowlConstructionLines", "AddSegments","AddCatenaryCurve", "NewXYSketch", "AddVase" ])
 
 	def Activated(self):
 		"""Called when the workbench is activated"""

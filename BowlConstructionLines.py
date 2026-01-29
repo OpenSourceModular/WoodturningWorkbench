@@ -11,7 +11,7 @@ class BowlConstructionLines:
 		"""Return the command resources"""
 		return {
 			'Pixmap': '',  # You can add an icon path here
-			'MenuText': 'Add Construction Lines to Bowl',
+			'MenuText': 'Add Bowl Profile Points',
 			'ToolTip': 'Add construction lines to the document'
 		}
 
@@ -26,7 +26,8 @@ class BowlConstructionLines:
 			from PySide import QtGui, QtCore
 			from FreeCAD import Vector
 			import Part
-			import Sketcher	
+			import Sketcher
+				
 
 	#Creates the Dialog Box
 			def __init__(self):
