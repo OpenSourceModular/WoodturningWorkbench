@@ -11,9 +11,10 @@ class BowlConstructionLines:
 	def GetResources(self):
 		"""Return the command resources"""
 		from pathlib import Path
+		import FreeCAD
 		#image = str(Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "BowlConstructionLines.svg")
 		return {
-			'Pixmap': '',  # You can add an icon path here
+			'Pixmap': str(Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "BowlConstructionLines.svg"),
 			'MenuText': 'Add Bowl Profile Points',
 			'ToolTip': 'Add construction lines to the document'
 		}
@@ -36,13 +37,41 @@ class BowlConstructionLines:
 			def __init__(self):
 				#Local Variables with Default Values
 				print("Initializing Bowl Construction Lines GUI")
+				from varsetOps import setVarsetValue, getVarsetValue, getVarsetInt
 				from PySide import QtGui, QtCore, QtWidgets	
-				self.form = QtWidgets.QWidget()
-				self.form.setWindowTitle("Make Sketch with Bowl Construction Lines")
+				doc = App.activeDocument()
 				self.bowl_height = 254.0  # Bowl height in mm
 				self.bowl_radius = 127.0  # Bowl radius in mm
-				self.layer_height = 19.05 # Layer height in mm
+				self.layer_height = 25.4 # Layer height in mm
 				self.construction_lines = True
+				if not doc.getObject("BowlVariables"):
+					self.varset = doc.addObject("App::VarSet", "BowlVariables")
+					# Add a variable (property) to the VarSet
+					# Syntax: addProperty(type, name, group, tooltip)
+					self.varset.addProperty("App::PropertyInteger", "NumSegments", "General", "Number of segments for the bowl")
+					self.varset.NumSegments = 12
+					self.varset.addProperty("App::PropertyLength", "BowlHeight", "General", "Height of the bowl")
+					self.varset.BowlHeight = self.bowl_height
+					self.varset.addProperty("App::PropertyLength", "LayerHeight", "General", "Height of each layer")
+					self.varset.LayerHeight = self.layer_height
+					self.varset.addProperty("App::PropertyAngle", "RotateAngle", "General", "Rotation angle for rings")
+					self.varset.RotateAngle = 15.0
+					self.varset.LayerHeight = self.layer_height
+					self.varset.addProperty("App::PropertyLength", "WallThickness", "General", "Wall thickness of the bowl")
+					self.varset.WallThickness = 10.0
+				else:
+					print("hey")
+					self.bowl_height = getVarsetValue(self,"BowlHeight")
+					self.layer_height = getVarsetValue(self,"LayerHeight")
+					
+					self.num_segments = getVarsetInt(self,"NumSegments")
+					self.rotate_angle = getVarsetValue(self,"RotateAngle")
+					self.wall_thickness = getVarsetValue(self,"WallThickness")
+
+									
+				self.form = QtWidgets.QWidget()
+				self.form.setWindowTitle("Make Sketch with Bowl Construction Lines")
+
 
 				self.list_of_points = []
 				self.list_of_lines = []	
@@ -100,9 +129,25 @@ class BowlConstructionLines:
 				self.layer_heightBox.setToolTip("Height of each layer in mm")
 				self.bt_generate_lines.setToolTip("Generate construction lines for each layer of the bowl")	
 				self.bt_delete_lines.setToolTip("Delete all construction lines created by this macro")
+			def getVarsetValue(self, property_name):
+				doc = App.activeDocument()
+				varset = doc.getObject("BowlVariables")
+				if varset and property_name in varset.PropertiesList:
+					return getattr(varset, property_name).Value
+				else:
+					print(f"Property {property_name} not found in BowlVariables.")
+					return None
+			def setVarsetValue(self, property_name, value):
+				doc = App.activeDocument()
+				varset = doc.getObject("BowlVariables")
+				if varset and property_name in varset.PropertiesList:
+					setattr(varset, property_name, value)
+				else:
+					print(f"Property {property_name} not found in BowlVariables.")
 
 			def update_values(self):
 				#Update the local variables with the values in the text boxes
+				
 				self.bowl_height = float(self.bowl_heightBox.text())
 				self.bowl_radius = float(self.bowl_radiusBox.text())
 				self.layer_height = float(self.layer_heightBox.text())
@@ -110,6 +155,10 @@ class BowlConstructionLines:
 					self.construction_lines = True
 				else:
 					self.construction_lines = False
+				self.setVarsetValue("NumSegments", 12)
+				self.setVarsetValue("BowlHeight", self.bowl_height)
+				self.setVarsetValue("LayerHeight", self.layer_height)
+
 				
 			def bt_generate_lines_click(self):
 				print("Generating Lines")

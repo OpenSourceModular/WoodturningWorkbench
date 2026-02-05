@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="48"
+   height="48"
+   viewBox="0 0 48 48"
+   version="1.1"
+   id="svg1"
+   xml:space="preserve"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   sodipodi:docname="AddCatenaryCurve.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="8.40625"
+     inkscape:cx="10.171004"
+     inkscape:cy="37.174721"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" /><defs
+     id="defs1" /><g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"><rect
+       style="fill:#cccccc;stroke:#cccccc;stroke-width:2.118;stroke-linecap:round;stroke-dasharray:none"
+       id="rect1"
+       width="45.898785"
+       height="45.915348"
+       x="1.0423249"
+       y="1.0423249" /><path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-dasharray:none"
+       d="m 4.0858549,43.722373 c 0,0 4.5180115,-0.234881 6.7293431,-0.672934 2.010086,-0.398187 3.983352,-1.011043 5.888176,-1.766453 1.806717,-0.716503 3.542818,-1.617366 5.215241,-2.607621 2.288868,-1.355256 4.503751,-2.856214 6.56111,-4.542306 1.717755,-1.407772 3.245697,-3.034813 4.794657,-4.626424 1.536442,-1.578748 3.059494,-3.325131 4.339231,-4.997733 1.279737,-1.672602 4.227968,-6.096329 5.253585,-7.823888 1.677695,-2.825924 2.872579,-5.770241 2.872579,-5.770241"
+       id="path1"
+       sodipodi:nodetypes="cssssszsc" /></g></svg>

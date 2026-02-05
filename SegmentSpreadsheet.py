@@ -52,7 +52,7 @@ class SegmentSpreadsheet:
 		print("doc:", doc)
 		print("type(doc):", type(doc))
 		# Create a new spreadsheet
-		spreadsheet = doc.addObject("Spreadsheet::Sheet", "Sheet2")
+		spreadsheet = doc.addObject("Spreadsheet::Sheet", "Segment Dimension Spreadsheet")
 		spreadsheet.mergeCells('A1:D1')
 		spreadsheet.set("A1", "Segment Dimensions (in mm rounded up)")
 		spreadsheet.setAlignment('A1:D1', 'center', 'keep')

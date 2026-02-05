@@ -12,8 +12,10 @@ class AddCatenaryCurve:
 
 	def GetResources(self):
 		"""Return the command resources"""
+		import FreeCAD
+		from pathlib import Path
 		return {
-			'Pixmap': '',  # You can add an icon path here
+			'Pixmap': str(Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "AddCatenaryCurve.svg"),  # You can add an icon path here
 			'MenuText': 'Add Catenary Curve',
 			'ToolTip': 'Add a catenary curve sketch to the document'
 		}
