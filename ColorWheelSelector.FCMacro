@@ -1,0 +1,387 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+FreeCAD Color Wheel Selector Macro
+Opens an RGB color wheel and applies the selected color to the active object.
+"""
+
+import FreeCAD
+import FreeCADGui
+from PySide import QtWidgets, QtCore, QtGui
+import math
+import colorsys
+
+class ColorWheel(QtWidgets.QWidget):
+    """Custom color wheel widget for color selection."""
+    
+    color_selected = QtCore.Signal(tuple)  # Emits (R, G, B) tuple
+    
+    def __init__(self):
+        super().__init__()
+        self.wheel_radius = 150
+        self.selected_color = (255, 0, 0)  # Default to red
+        self.hue = 0
+        self.saturation = 1.0
+        self.value = 1.0
+        self.setMinimumSize(350, 350)
+        self.setStyleSheet("background-color: white;")
+        
+    def paintEvent(self, event):
+        """Draw the color wheel."""
+        painter = QtGui.QPainter(self)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        
+        center_x = self.width() // 2
+        center_y = self.height() // 2
+        
+        # Draw color wheel
+        for angle in range(360):
+            for radius in range(self.wheel_radius):
+                hue = angle / 360.0
+                saturation = radius / self.wheel_radius
+                r, g, b = colorsys.hsv_to_rgb(hue, saturation, self.value)
+                color = QtGui.QColor.fromRgbF(r, g, b)
+                
+                painter.setPen(color)
+                rad = math.radians(angle)
+                x1 = center_x + radius * math.cos(rad)
+                y1 = center_y + radius * math.sin(rad)
+                x2 = center_x + (radius + 1) * math.cos(rad)
+                y2 = center_y + (radius + 1) * math.sin(rad)
+                painter.drawLine(int(x1), int(y1), int(x2), int(y2))
+        
+        # Draw value slider (brightness) at bottom
+        for i in range(256):
+            brightness = i / 255.0
+            r, g, b = colorsys.hsv_to_rgb(self.hue, self.saturation, brightness)
+            color = QtGui.QColor.fromRgbF(r, g, b)
+            painter.fillRect(i * 2, self.height() - 30, 2, 30, color)
+        
+        # Draw selection indicator
+        painter.setPen(QtGui.QPen(QtCore.Qt.black, 2))
+        painter.setBrush(QtCore.Qt.NoBrush)
+        
+        rad = math.radians(self.hue * 360)
+        radius = self.saturation * self.wheel_radius
+        x = center_x + radius * math.cos(rad)
+        y = center_y + radius * math.sin(rad)
+        painter.drawEllipse(QtCore.QPointF(x, y), 8, 8)
+        
+        # Draw indicator for value slider
+        value_x = self.value * 255 * 2
+        painter.drawEllipse(QtCore.QPointF(value_x, self.height() - 15), 5, 5)
+        
+    def mousePressEvent(self, event):
+        """Handle mouse click to select color."""
+        self.updateColorFromMouse(event.position().toPoint())
+        
+    def mouseMoveEvent(self, event):
+        """Handle mouse movement for real-time color preview."""
+        if event.buttons() & QtCore.Qt.LeftButton:
+            self.updateColorFromMouse(event.position().toPoint())
+    
+    def updateColorFromMouse(self, pos):
+        """Update color based on mouse position."""
+        center_x = self.width() // 2
+        center_y = self.height() // 2
+        
+        # Check if click is on brightness slider
+        if pos.y() > self.height() - 35:
+            self.value = max(0, min(1, pos.x() / (self.width() / 2) / 255 * self.width()))
+            if self.value > 1:
+                self.value = 1
+            self.update()
+            self.emitColor()
+            return
+        
+        # Otherwise, process as color wheel
+        dx = pos.x() - center_x
+        dy = pos.y() - center_y
+        distance = math.sqrt(dx * dx + dy * dy)
+        
+        if distance <= self.wheel_radius:
+            angle = math.degrees(math.atan2(dy, dx))
+            if angle < 0:
+                angle += 360
+            
+            self.hue = angle / 360.0
+            self.saturation = distance / self.wheel_radius
+            
+            self.update()
+            self.emitColor()
+    
+    def emitColor(self):
+        """Emit the current selected color as RGB."""
+        r, g, b = colorsys.hsv_to_rgb(self.hue, self.saturation, self.value)
+        self.selected_color = (int(r * 255), int(g * 255), int(b * 255))
+        self.color_selected.emit(self.selected_color)
+
+
+class ColorWheelDialog(QtWidgets.QDialog):
+    """Main dialog for color wheel selection."""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("FreeCAD Color Wheel Selector")
+        self.setGeometry(100, 100, 450, 550)
+        
+        layout = QtWidgets.QVBoxLayout()
+        
+        # Color wheel
+        self.color_wheel = ColorWheel()
+        self.color_wheel.color_selected.connect(self.on_color_selected)
+        layout.addWidget(self.color_wheel)
+        
+        # Color preview
+        preview_layout = QtWidgets.QHBoxLayout()
+        preview_layout.addWidget(QtWidgets.QLabel("Selected Color:"))
+        self.color_preview = QtWidgets.QWidget()
+        self.color_preview.setMinimumHeight(40)
+        self.color_preview.setStyleSheet("background-color: rgb(255, 0, 0); border: 2px solid black;")
+        preview_layout.addWidget(self.color_preview)
+        layout.addLayout(preview_layout)
+        
+        # RGB values display
+        values_layout = QtWidgets.QHBoxLayout()
+        values_layout.addWidget(QtWidgets.QLabel("RGB:"))
+        self.rgb_label = QtWidgets.QLabel("255, 0, 0")
+        self.rgb_label.setMinimumWidth(100)
+        values_layout.addWidget(self.rgb_label)
+        values_layout.addStretch()
+        layout.addLayout(values_layout)
+
+        text_layout = QtWidgets.QHBoxLayout()
+        text_layout.addWidget(QtWidgets.QLabel("Select every x object:"))
+        self.apply_every_x_input = QtWidgets.QLineEdit("1")
+        text_layout.addWidget(self.apply_every_x_input)
+        apply_every_x_btn = QtWidgets.QPushButton("Select Every X")
+        apply_every_x_btn.clicked.connect(self.apply_every_x_input_click)
+        text_layout.addWidget(apply_every_x_btn)
+
+        layout.addLayout(text_layout)
+        # Buttons
+        button_layout = QtWidgets.QHBoxLayout()
+        button_layout.addStretch()
+
+        apply_color_to_all_btn = QtWidgets.QPushButton("Apply Color to All Segments")
+        apply_color_to_all_btn.clicked.connect(self.apply_color_to_all_segments)
+        button_layout.addWidget(apply_color_to_all_btn)
+
+        select_ring_btn = QtWidgets.QPushButton("Select Ring")
+        select_ring_btn.clicked.connect(self.select_ring_click)
+        button_layout.addWidget(select_ring_btn)
+
+        select_column_btn = QtWidgets.QPushButton("Select Column")
+        select_column_btn.clicked.connect(self.select_column_click)
+        button_layout.addWidget(select_column_btn)
+
+        get_color_btn = QtWidgets.QPushButton("Get Color from Selected")
+        get_color_btn.clicked.connect(self.get_color_from_selected)
+        button_layout.addWidget(get_color_btn)
+        
+        apply_btn = QtWidgets.QPushButton("Apply to Selected")
+        apply_btn.clicked.connect(self.apply_color)
+        button_layout.addWidget(apply_btn)
+        
+
+        button_layout2 = QtWidgets.QHBoxLayout()
+        close_btn = QtWidgets.QPushButton("Close")
+        close_btn.clicked.connect(self.close)
+        button_layout2.addWidget(close_btn)
+        
+        layout.addLayout(button_layout)
+        layout.addLayout(button_layout2)
+        
+        self.setLayout(layout)
+        self.current_color = (255, 0, 0)
+    def select_ring_click(self):
+        """Select all segments in the same column as the first selected object."""
+        doc = FreeCAD.activeDocument()
+        if not doc:
+            QtWidgets.QMessageBox.warning(self, "Error", "No active document in FreeCAD.")
+            return
+        
+        selected_objects = FreeCADGui.Selection.getSelection()
+        if not selected_objects:
+            QtWidgets.QMessageBox.warning(self, "Error", "Please select an object in FreeCAD first.")
+            return
+        
+        selected_label = selected_objects[0].Label
+        selected_label_prefix = selected_label[:9]
+        
+        # Select all objects with the same prefix
+        new_selection = []
+        for obj in doc.Objects:
+            if obj.Label.startswith(selected_label_prefix):
+                new_selection.append(obj)
+        
+        FreeCADGui.Selection.clearSelection()
+        for obj in new_selection:
+            FreeCADGui.Selection.addSelection(obj)
+        doc.recompute()
+
+    def select_column_click(self):
+        """Select all segments in the same column as the first selected object."""
+        doc = FreeCAD.activeDocument()
+        if not doc:
+            QtWidgets.QMessageBox.warning(self, "Error", "No active document in FreeCAD.")
+            return
+        
+        selected_objects = FreeCADGui.Selection.getSelection()
+        if not selected_objects:
+            QtWidgets.QMessageBox.warning(self, "Error", "Please select an object in FreeCAD first.")
+            return
+        
+        selected_label = selected_objects[0].Label
+        selected_label_postfix = selected_label[-3:]
+        
+        # Select all objects with the same prefix
+        new_selection = []
+        for obj in doc.Objects:
+            if obj.Label.endswith(selected_label_postfix):
+                new_selection.append(obj)
+        
+        FreeCADGui.Selection.clearSelection()
+        for obj in new_selection:
+            FreeCADGui.Selection.addSelection(obj)
+        doc.recompute()
+    def getVarsetInt(self, property_name):
+        doc = App.activeDocument()
+        varset = doc.getObject("BowlVariables")
+        print("hey2")
+        if varset and property_name in varset.PropertiesList:
+            return getattr(varset, property_name)
+        else:
+            print(f"Property {property_name} not found in BowlVariables.")
+            return None
+    def getVarsetInt(self, property_name):
+        doc = App.activeDocument()
+        varset = doc.getObject("BowlVariables")
+        print("hey2")
+        if varset and property_name in varset.PropertiesList:
+            return getattr(varset, property_name)
+        else:
+            print(f"Property {property_name} not found in BowlVariables.")
+            return None
+    def apply_color_to_all_segments(self):
+        """Apply the selected color to all segments in the bowl."""
+        doc = FreeCAD.activeDocument()
+        if not doc:
+            QtWidgets.QMessageBox.warning(self, "Error", "No active document in FreeCAD.")
+            return
+        selection_set = []
+        for obj in doc.Objects:
+            if "Ring" in obj.Label:
+                selection_set.append(obj)
+        FreeCADGui.Selection.clearSelection()
+        for obj in selection_set:
+            FreeCADGui.Selection.addSelection(obj)
+        self.apply_color()
+        FreeCADGui.Selection.clearSelection()
+        doc.recompute()
+                
+    def apply_every_x_input_click(self):
+        """Get color from the first selected FreeCAD object."""
+        doc = FreeCAD.activeDocument()
+        if not doc:
+            QtWidgets.QMessageBox.warning(self, "Error", "No active document in FreeCAD.")
+            return
+        
+        selected_objects = FreeCADGui.Selection.getSelection()
+        if not selected_objects:
+            QtWidgets.QMessageBox.warning(self, "Error", "Please select an object in FreeCAD first.")
+            return
+        new_selection = []
+        for obj in selected_objects:
+            selected_label = obj.Label
+            selected_label_prefix = selected_label[:9]
+            current_segment = int(selected_label[-3:])
+            x = int(self.apply_every_x_input.text() )
+            num_segments = self.getVarsetInt("NumSegments")
+            start_segment = current_segment
+            not_done = True
+            reached_end = False
+            while not_done:
+                current_segment += x
+                if current_segment > num_segments and not reached_end:
+                    current_segment = current_segment - num_segments
+                    reached_end = True
+                if current_segment >= start_segment and reached_end:
+                    not_done = False
+                #print(current_segment)
+                current_segment_string = selected_label_prefix + f"{current_segment:03d}"
+                new_selection.append( doc.getObjectsByLabel(current_segment_string)[0] )
+        FreeCADGui.Selection.clearSelection()
+        for obj in new_selection:
+            FreeCADGui.Selection.addSelection(obj)
+        doc.recompute()
+
+                 
+
+
+    def get_color_from_selected(self):
+        """Get color from the first selected FreeCAD object."""
+        doc = FreeCAD.activeDocument()
+        if not doc:
+            QtWidgets.QMessageBox.warning(self, "Error", "No active document in FreeCAD.")
+            return
+        
+        selected_objects = FreeCADGui.Selection.getSelection()
+        if not selected_objects:
+            QtWidgets.QMessageBox.warning(self, "Error", "Please select an object in FreeCAD first.")
+            return
+        
+        obj = selected_objects[0]
+        if hasattr(obj, 'ViewObject'):
+            color = obj.ViewObject.ShapeColor
+            r = int(color[0] * 255)
+            g = int(color[1] * 255)
+            b = int(color[2] * 255)
+            self.on_color_selected((r, g, b))
+
+        else:
+            QtWidgets.QMessageBox.warning(self, "Error", "Selected object has no view properties.")
+    
+    def on_color_selected(self, color):
+        """Update preview when color is selected."""
+        self.current_color = color
+        r, g, b = color
+        self.color_preview.setStyleSheet(f"background-color: rgb({r}, {g}, {b}); border: 2px solid black;")
+        self.rgb_label.setText(f"{r}, {g}, {b}")
+    
+    def apply_color(self):
+        """Apply the selected color to the active FreeCAD object."""
+        doc = FreeCAD.activeDocument()
+        if not doc:
+            QtWidgets.QMessageBox.warning(self, "Error", "No active document in FreeCAD.")
+            return
+        
+        selected_objects = FreeCADGui.Selection.getSelection()
+        if not selected_objects:
+            QtWidgets.QMessageBox.warning(self, "Error", "Please select an object in FreeCAD first.")
+            return
+        
+        r, g, b = self.current_color
+        
+        # Apply color to all selected objects
+        for obj in selected_objects:
+            if hasattr(obj, 'ViewObject'):
+                obj.ViewObject.ShapeColor = (r / 255.0, g / 255.0, b / 255.0, 1.0)
+                FreeCADGui.updateGui()
+        FreeCADGui.Selection.clearSelection()
+        #QtWidgets.QMessageBox.information(
+        #    self, 
+        #    "Success", 
+        #    f"Applied color RGB({r}, {g}, {b}) to {len(selected_objects)} object(s)."
+        #)
+
+
+def main():
+    """Main function to launch the color wheel dialog."""
+    dialog = ColorWheelDialog(FreeCADGui.getMainWindow())
+    dialog.show()
+
+
+if __name__ == "__main__":
+    main()

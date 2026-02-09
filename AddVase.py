@@ -1,6 +1,20 @@
-"""
-AddSegments.py - Command to add segments to a bowl design
-"""
+#   Copyright (c) 2026 Justin Ahrens <justin@ahrens.net>        
+#                                                                         
+#   This library is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU Library General Public
+#   License as published by the Free Software Foundation; either
+#   version 2 of the License, or (at your option) any later version.
+#
+#   This library  is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU Library General Public License for more details.
+#
+#   You should have received a copy of the GNU Library General Public
+#   License along with this library; see the file COPYING.LIB. If not,
+#   write to the Free Software Foundation, Inc., 59 Temple Place,
+#   Suite 330, Boston, MA  02111-1307, USA
+# 
 
 import math
 from pydoc import doc
@@ -46,6 +60,7 @@ class AddVase:
                 self.form.setWindowTitle("Import Vase")
                 #Local Variables with Default Values
                 self.svg_height = 254  # Height to scale the SVG to (mm)
+                self.svg_width = 100  # Width to scale the SVG to (mm), if None it will be scaled proportionally based on height
                 if not doc.getObject("BowlVariables"):
                     self.varset = doc.addObject("App::VarSet", "BowlVariables")
                     # Add a variable (property) to the VarSet
@@ -54,6 +69,8 @@ class AddVase:
                     self.varset.NumSegments = 12
                     self.varset.addProperty("App::PropertyLength", "BowlHeight", "General", "Height of the bowl")
                     self.varset.BowlHeight = self.svg_height
+                    self.varset.addProperty("App::PropertyLength", "BowlWidth", "General", "Width of the bowl")
+                    self.varset.BowlWidth = self.svg_width
                     self.varset.addProperty("App::PropertyLength", "LayerHeight", "General", "Height of each layer")
                     self.varset.LayerHeight = 25.4
                     self.varset.addProperty("App::PropertyAngle", "RotateAngle", "General", "Rotation angle for rings")
@@ -71,11 +88,31 @@ class AddVase:
                 layout.addWidget(title_label)
 
                 text_box_layout = QtWidgets.QVBoxLayout()
-                image_y_size_label = QtWidgets.QLabel("Image Y Size:")
+                image_y_size_label = QtWidgets.QLabel("Image Height in mm:")
                 self.image_y_size_input = QtWidgets.QLineEdit()
                 self.image_y_size_input.setText("254")
                 text_box_layout.addWidget(image_y_size_label)
                 text_box_layout.addWidget(self.image_y_size_input)
+                
+                image_x_size_label = QtWidgets.QLabel("Image Width in mm:")
+                self.image_x_size_input = QtWidgets.QLineEdit()
+                self.image_x_size_input.setText("100")
+                text_box_layout.addWidget(image_x_size_label)
+                text_box_layout.addWidget(self.image_x_size_input)
+                
+                # Radio buttons for scaling preference
+                scaling_group = QtWidgets.QGroupBox("Scale By:")
+                scaling_layout = QtWidgets.QHBoxLayout()
+                
+                self.scale_by_y_radio = QtWidgets.QRadioButton("Height")
+                self.scale_by_x_radio = QtWidgets.QRadioButton("Width")
+                self.scale_by_y_radio.setChecked(True)  # Default to Y
+                
+                scaling_layout.addWidget(self.scale_by_y_radio)
+                scaling_layout.addWidget(self.scale_by_x_radio)
+                scaling_group.setLayout(scaling_layout)
+                text_box_layout.addWidget(scaling_group)
+                
                 layout.addLayout(text_box_layout)
 
                 vases_layout = QtWidgets.QHBoxLayout()
@@ -133,10 +170,17 @@ class AddVase:
                 button_layout = QtWidgets.QHBoxLayout()
 
                 # Add Bowl Outlines button
+                self.browse_vase_button = QtWidgets.QPushButton("Browse SVG")
+                self.browse_vase_button.clicked.connect(self.bt_browse_vase)
+
+                self.delete_vase_button = QtWidgets.QPushButton("Delete Vase")
+                self.delete_vase_button.clicked.connect(self.bt_delete_vase)
 
                 self.cancel_button = QtWidgets.QPushButton("Close")
                 self.cancel_button.clicked.connect(self.on_cancel)
                 #button_layout.addWidget(self.add_vase_button)
+                button_layout.addWidget(self.browse_vase_button)
+                button_layout.addWidget(self.delete_vase_button)
                 button_layout.addWidget(self.cancel_button)
                 layout.addLayout(button_layout)
             
@@ -151,7 +195,9 @@ class AddVase:
             def update_values(self):
                 #Update the local variables with the values in the text boxes
                 self.svg_height = float(self.image_y_size_input.text())
-                setVarsetValue(self, "BowlHeight", self.svg_height)
+                self.svg_width = float(self.image_x_size_input.text()) 
+                self.scale_by_y = self.scale_by_y_radio.isChecked()
+
                 
             def bt_add_vase_click_it(self):
                 vase_name = "vase1.svg"
@@ -203,19 +249,147 @@ class AddVase:
                         if obj.TypeId == "Image::ImagePlane":
                             vase_obj = obj
                     
-                    y = vase_obj.YSize
-                    scale_factor = self.svg_height / y
-                    new_x_size = vase_obj.XSize * scale_factor
+                    if self.scale_by_y:
+                        # Scale by Y value
+                        y = vase_obj.YSize
+                        scale_factor = self.svg_height / y
+                        new_x_size = vase_obj.XSize * scale_factor
+                        vase_obj.YSize = self.svg_height
+                        vase_obj.XSize = new_x_size
+                        self.svg_width = new_x_size
+                    else:
+                        # Scale by X value
+                        if self.svg_width:
+                            x = vase_obj.XSize
+                            scale_factor = self.svg_width / x
+                            new_y_size = vase_obj.YSize * scale_factor
+                            vase_obj.XSize = self.svg_width
+                            vase_obj.YSize = new_y_size
+                            self.svg_height = new_y_size
+                        else:
+                            # If X size not provided, fall back to Y scaling
+                            y = vase_obj.YSize
+                            scale_factor = self.svg_height / y
+                            new_x_size = vase_obj.XSize * scale_factor
+                            vase_obj.YSize = self.svg_height
+                            vase_obj.XSize = new_x_size
+                            self.svg_width = new_x_size
                     
-                    vase_obj.YSize = self.svg_height
-                    vase_obj.XSize = new_x_size
                     vase_obj.Placement = FreeCAD.Placement(FreeCAD.Vector(0,0,self.svg_height/2),FreeCAD.Rotation(FreeCAD.Vector(1,0,0),90))
+                    setVarsetValue(self, "BowlHeight", self.svg_height)
+                    setVarsetValue(self, "BowlWidth", self.svg_width)
+                    self.image_x_size_input.setText(str(round(self.svg_width, 2)))
+                    self.image_y_size_input.setText(str(round(self.svg_height, 2)))
                     doc.recompute()
                     Gui.activeDocument().activeView().viewFront()
                     Gui.SendMsgToActiveView("ViewFit")
                     
                 except Exception as e:
                     FreeCAD.Console.PrintError(f"Error adding vase: {str(e)}\n")
+
+            def bt_delete_vase(self):
+                """Delete any image objects that start with 'vase'"""
+                try:
+                    import FreeCAD
+                    doc = FreeCAD.ActiveDocument
+                    
+                    # Collect objects to delete (can't delete while iterating)
+                    objects_to_delete = []
+                    for obj in doc.Objects:
+                        if obj.Name.lower().startswith("vase"):
+                            doc.removeObject(obj.Name)
+                    
+                except Exception as e:
+                    FreeCAD.Console.PrintError(f"Error deleting vase: {str(e)}\n")
+
+            def bt_browse_vase(self):
+                """Open file browser to select a custom SVG file"""
+                try:
+                    import FreeCAD
+                    from pathlib import Path
+                    from PySide import QtWidgets
+                    
+                    # Open file dialog
+                    file_dialog = QtWidgets.QFileDialog()
+                    file_path, _ = file_dialog.getOpenFileName(
+                        None,
+                        "Select SVG File",
+                        str(Path.home()),  # Start in home directory
+                        "SVG Files (*.svg);;All Files (*)"
+                    )
+                    
+                    if not file_path:
+                        FreeCAD.Console.PrintMessage("File selection cancelled\n")
+                        return
+                    
+                    # Verify file exists
+                    if not Path(file_path).exists():
+                        FreeCAD.Console.PrintError(f"File not found: {file_path}\n")
+                        return
+                    
+                    # Add and scale the vase
+                    self._add_and_scale_vase(file_path)
+                    
+                except Exception as e:
+                    FreeCAD.Console.PrintError(f"Error browsing vase file: {str(e)}\n")
+
+            def _add_and_scale_vase(self, file_path):
+                """Helper method to add and scale a vase SVG file"""
+                try:
+                    import FreeCAD
+                    from freecad import module_io
+                    
+                    self.update_values()
+                    doc = FreeCAD.ActiveDocument
+                    
+                    # Insert the SVG file
+                    a_vase = module_io.OpenInsertObject("FreeCADGui", file_path, "insert", "Unnamed")
+                    doc.recompute()
+                    FreeCAD.Console.PrintMessage(f"Vase added from: {file_path}\n")
+                    
+                    # Find the image object
+                    vase_obj = None
+                    for obj in doc.Objects:
+                        if obj.TypeId == "Image::ImagePlane":
+                            vase_obj = obj
+                    
+                    if not vase_obj:
+                        FreeCAD.Console.PrintError("Could not find image object\n")
+                        return
+                    
+                    # Apply scaling logic
+                    if self.scale_by_y:
+                        # Scale by Y value
+                        y = vase_obj.YSize
+                        scale_factor = self.svg_height / y
+                        new_x_size = vase_obj.XSize * scale_factor
+                        vase_obj.YSize = self.svg_height
+                        vase_obj.XSize = new_x_size
+                    else:
+                        # Scale by X value
+                        if self.svg_width:
+                            x = vase_obj.XSize
+                            scale_factor = self.svg_width / x
+                            new_y_size = vase_obj.YSize * scale_factor
+                            vase_obj.XSize = self.svg_width
+                            vase_obj.YSize = new_y_size
+                        else:
+                            # If X size not provided, fall back to Y scaling
+                            y = vase_obj.YSize
+                            scale_factor = self.svg_height / y
+                            new_x_size = vase_obj.XSize * scale_factor
+                            vase_obj.YSize = self.svg_height
+                            vase_obj.XSize = new_x_size
+                    
+                    vase_obj.Placement = FreeCAD.Placement(FreeCAD.Vector(0, 0, self.svg_height / 2), FreeCAD.Rotation(FreeCAD.Vector(1, 0, 0), 90))
+                    self.update_values()
+                    doc.recompute()
+                    Gui.activeDocument().activeView().viewFront()
+                    Gui.SendMsgToActiveView("ViewFit")
+                    FreeCAD.Console.PrintMessage("Vase scaled and positioned\n")
+                    
+                except Exception as e:
+                    FreeCAD.Console.PrintError(f"Error adding and scaling vase: {str(e)}\n")
 
             def on_cancel(self):
                 """Cancel and close the task panel"""

@@ -1,6 +1,20 @@
-"""
-InitGui.py - Initialize the GUI for Woodturning Workbench
-"""
+#   Copyright (c) 2026 Justin Ahrens <justin@ahrens.net>        
+#                                                                         
+#   This library is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU Library General Public
+#   License as published by the Free Software Foundation; either
+#   version 2 of the License, or (at your option) any later version.
+#
+#   This library  is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU Library General Public License for more details.
+#
+#   You should have received a copy of the GNU Library General Public
+#   License along with this library; see the file COPYING.LIB. If not,
+#   write to the Free Software Foundation, Inc., 59 Temple Place,
+#   Suite 330, Boston, MA  02111-1307, USA
+# 
 
 import FreeCAD
 import FreeCADGui as Gui	
@@ -12,6 +26,7 @@ from AddSegments import AddSegments
 from AddCatenaryCurve import AddCatenaryCurve
 from BowlConstructionLines import BowlConstructionLines
 from SegmentSpreadsheet import SegmentSpreadsheet
+from BowlFromABoard import BowlFromABoard
 
 from pathlib import Path
 
@@ -22,7 +37,7 @@ try:
 	Gui.addCommand('AddSegments', AddSegments())
 	Gui.addCommand('AddCatenaryCurve', AddCatenaryCurve())
 	Gui.addCommand('SegmentSpreadsheet', SegmentSpreadsheet())
-	Gui.addCommand('TaskPanelTemplate', TaskPanelTemplate())
+	Gui.addCommand('BowlFromABoard', BowlFromABoard())
 	Gui.addCommand('AddVase', AddVase())
 	
 	
@@ -39,8 +54,8 @@ class WoodturningWorkbench(Gui.Workbench):
 	def Initialize(self):
 		"""Initialize the workbench"""
 		# Add commands to toolbar and menu
-		self.appendToolbar("Woodturning Tools", ["AddVase","BowlConstructionLines", "AddSegments", "AddCatenaryCurve", "SegmentSpreadsheet", "TaskPanelTemplate"])
-		self.appendMenu("Woodturning Tools	", ["AddVase","BowlConstructionLines", "AddSegments","AddCatenaryCurve", "SegmentSpreadsheet", "TaskPanelTemplate"])
+		self.appendToolbar("Woodturning Tools", ["AddVase","BowlConstructionLines", "AddSegments", "AddCatenaryCurve", "SegmentSpreadsheet", "BowlFromABoard"])
+		self.appendMenu("Woodturning Tools	", ["AddVase","BowlConstructionLines", "AddSegments","AddCatenaryCurve", "SegmentSpreadsheet", "BowlFromABoard"])
 		print("Woodturning Tools Workbench initialized")
 
 	def Activated(self):
