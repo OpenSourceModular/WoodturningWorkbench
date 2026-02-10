@@ -15,6 +15,7 @@
 #   write to the Free Software Foundation, Inc., 59 Temple Place,
 #   Suite 330, Boston, MA  02111-1307, USA
 # 
+#from click import Path
 import FreeCAD	
 import FreeCADGui
 import Sketcher
@@ -58,13 +59,35 @@ class About:
 			def init_ui(self):
 				import FreeCADGui
 				from PySide import QtWidgets, QtCore, QtGui
+				from pathlib import Path
 				"""Initialize the user interface."""
 				self.setWindowTitle("WoodTurning Workbench About Page")
 				self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
 				self.setGeometry(100, 100, 740, 740)
+
+				self.image_label = QtWidgets.QLabel()
+
+				# Define the image path (use an absolute path for reliability)
+				#image_path = os.path.join(os.getcwd(), "logo.png") # Replace "logo.png" with your image filename
+				image_path = str(Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "AboutVase.svg")
+				# Create a QPixmap object from the image file
+				try:
+					pixmap = QtGui.QPixmap(image_path)
+					if pixmap.isNull():
+						print(f"Error: Could not load image from {image_path}")
+						return
+					self.image_label.setPixmap(pixmap)
+				except Exception as e:
+					print(f"An error occurred: {e}")
+					return
+
+
+
+
 				layout = QtWidgets.QVBoxLayout(self)
 				close_btn = QtWidgets.QPushButton("Close")
 				close_btn.clicked.connect(self.close)
+				layout.addWidget(self.image_label)
 				layout.addWidget(close_btn)
 
 		dialog = AboutDialog()
