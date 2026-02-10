@@ -204,7 +204,7 @@ class BowlConstructionLines:
                 for i in range(1, num_lines + 1):
                     y_position = i * self.layer_height
                     start = Vector(0, y_position, 0)
-                    end = Vector(self.bowl_radius, y_position, 0)
+                    end = Vector(self.bowl_radius+25, y_position, 0)
                     line_idx = sketch.addGeometry(Part.LineSegment(start, end), False)
                     if(self.construction_lines):
                         sketch.setConstruction(line_idx, True)

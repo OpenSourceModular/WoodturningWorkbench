@@ -29,8 +29,10 @@ class SegmentSpreadsheet:
 
 	def GetResources(self):
 		"""Return the command resources"""
+		from pathlib import Path
+		import FreeCAD as App
 		return {
-			'Pixmap': '',  # You can add an icon path here
+			'Pixmap': str(Path(App.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "SegmentSpreadsheet.svg"), 
 			'MenuText': 'Make Segment Dimension Spreadsheet',
 			'ToolTip': 'Create a spreadsheet listing segment dimensions'
 		}
@@ -68,10 +70,16 @@ class SegmentSpreadsheet:
 		spreadsheet.set("A1", "Vessel Name:")
 		spreadsheet.set("A2", "Vessel Height:")
 		spreadsheet.set("A3", "Vessel Diameter:")
+		spreadsheet.set("C1", "Segments Per Ring:")
+		spreadsheet.set("C2", "Segment Angle:")
+		
 		if doc.getObject("BowlVariables"):
 			variables = doc.getObject("BowlVariables")
 			spreadsheet.set("B2", str(variables.BowlHeight))
 			spreadsheet.set("B3", str(variables.BowlWidth))
+			spreadsheet.set("D1", str(variables.NumSegments))
+			temp_angle = 180 / variables.NumSegments
+			spreadsheet.set("D2", str(temp_angle)+"°")
 			
 			spreadsheet.setDisplayUnit("B2:B3", "mm")
 		spreadsheet.mergeCells('B4:D4')
@@ -127,12 +135,13 @@ class SegmentSpreadsheet:
 
 		# Populate the spreadsheet with sorted data
 		row = 6
+		layer_num = 1
 		for label, x_dim, y_dim, z_dim in object_data:
 			x_dim2 = x_dim /25.4
 			y_dim2 = y_dim /25.4
 			z_dim2 = z_dim /25.4
 
-			spreadsheet.set(f"A{row}", label)
+			spreadsheet.set(f"A{row}", "Layer " + str(layer_num))
 			spreadsheet.set(f"B{row}", f"{x_dim:.2f}")
 			spreadsheet.set(f"C{row}", f"{y_dim:.2f}")
 			spreadsheet.set(f"D{row}", f"{z_dim:.2f}")
@@ -142,6 +151,7 @@ class SegmentSpreadsheet:
 			spreadsheet.setDisplayUnit(f"B{row}:D{row}", "mm")
 			spreadsheet.setDisplayUnit(f"E{row}:G{row}", "\"")		
 			row += 1
+			layer_num += 1
 		# App.getDocument('Unnamed').getObject('Segment_Dimension_Spreadsheet').setDisplayUnit('E3:G12', '\"')
 
 		# Recompute the document to update the spreadsheet

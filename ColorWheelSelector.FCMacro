@@ -25,7 +25,7 @@ class ColorWheel(QtWidgets.QWidget):
         self.saturation = 1.0
         self.value = 1.0
         self.setMinimumSize(350, 350)
-        self.setStyleSheet("background-color: white;")
+        self.setStyleSheet("background-color: gray;")
         
     def paintEvent(self, event):
         """Draw the color wheel."""

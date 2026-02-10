@@ -1,0 +1,76 @@
+#   Copyright (c) 2026 Justin Ahrens <justin@ahrens.net>        
+#                                                                         
+#   This library is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU Library General Public
+#   License as published by the Free Software Foundation; either
+#   version 2 of the License, or (at your option) any later version.
+#
+#   This library  is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU Library General Public License for more details.
+#
+#   You should have received a copy of the GNU Library General Public
+#   License along with this library; see the file COPYING.LIB. If not,
+#   write to the Free Software Foundation, Inc., 59 Temple Place,
+#   Suite 330, Boston, MA  02111-1307, USA
+# 
+import FreeCAD	
+import FreeCADGui
+import Sketcher
+import Part
+
+class About:
+	"""Command to add a catenary curve sketch"""
+	def __init__(self):
+		pass
+	#    obj.Proxy = self
+	#    obj.addProperty("App::PropertyInteger", "Sag", "Dimensions").Sag=-1
+
+	def GetResources(self):
+		"""Return the command resources"""
+		import FreeCAD
+		from pathlib import Path
+		return {
+			'Pixmap': str(Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "About.svg"),  # You can add an icon path here
+			#'Pixmap' : '',
+			'MenuText': 'About Woodturning Workbench',
+			'ToolTip': 'About the Woodturning Workbench and its creator'
+		}
+
+	def IsActive(self):
+		"""Check if the command is active"""
+		return FreeCAD.ActiveDocument is not None
+
+	def Activated(self):
+		"""Execute the command"""
+		import FreeCAD as App
+		from PySide import QtWidgets, QtCore, QtGui
+		
+		class AboutDialog(QtWidgets.QDialog):
+			import json
+			import os
+			def __init__(self):
+				super().__init__()
+				self.colors = []  # Store color entries: {"name": str, "color": QColor}
+				self.init_ui()
+
+			def init_ui(self):
+				import FreeCADGui
+				from PySide import QtWidgets, QtCore, QtGui
+				"""Initialize the user interface."""
+				self.setWindowTitle("WoodTurning Workbench About Page")
+				self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
+				self.setGeometry(100, 100, 740, 740)
+				layout = QtWidgets.QVBoxLayout(self)
+				close_btn = QtWidgets.QPushButton("Close")
+				close_btn.clicked.connect(self.close)
+				layout.addWidget(close_btn)
+
+		dialog = AboutDialog()
+		# Make it modeless so you can interact with FreeCAD while the dialog is open
+		dialog.setWindowModality(QtCore.Qt.NonModal)
+		dialog.show()
+		# Store reference to prevent garbage collection
+		#FreeCAD.Gui.MainWindow.color_list_dialog = dialog
+		FreeCAD.Gui.getMainWindow().about_dialog = dialog

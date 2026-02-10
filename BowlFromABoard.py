@@ -36,7 +36,7 @@ class BowlFromABoard:
         """Return the command resources"""
         from pathlib import Path
         return {
-            'Pixmap': str(Path(App.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "TaskPanelTemplate.svg"),  
+            'Pixmap': str(Path(App.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "BowlFromABoard.svg"),  
             'MenuText': 'Bowl From A Board',
             'ToolTip': 'Bowl From A Board Command'
         }
@@ -77,17 +77,86 @@ class BowlFromABoard:
                 title_label.setFont(title_font)
                 layout.addWidget(title_label)
 
+                # Board Width
+                board_width_layout = QtWidgets.QHBoxLayout()
                 board_width_label = QtWidgets.QLabel("Board Width:")
                 self.board_width_input = QtWidgets.QLineEdit()
                 self.board_width_input.setText(str(self.board_width))
-                layout.addWidget(board_width_label)
-                layout.addWidget(self.board_width_input)
+                board_width_layout.addWidget(board_width_label)
+                board_width_layout.addWidget(self.board_width_input)
+                layout.addLayout(board_width_layout)
 
+                # Slice Thickness
+                slice_thickness_layout = QtWidgets.QHBoxLayout()
                 slice_thickness_label = QtWidgets.QLabel("Slice Thickness:")
                 self.slice_thickness_input = QtWidgets.QLineEdit()
                 self.slice_thickness_input.setText(str(self.slice_thickness))
-                layout.addWidget(slice_thickness_label)
-                layout.addWidget(self.slice_thickness_input)                
+                slice_thickness_layout.addWidget(slice_thickness_label)
+                slice_thickness_layout.addWidget(self.slice_thickness_input)
+                layout.addLayout(slice_thickness_layout)
+
+                # Slice Angle
+                slice_angle_layout = QtWidgets.QHBoxLayout()
+                slice_angle_label = QtWidgets.QLabel("Slice Angle:")
+                self.slice_angle_input = QtWidgets.QLineEdit()
+                self.slice_angle_input.setText(str(self.slice_angle))
+                slice_angle_layout.addWidget(slice_angle_label)
+                slice_angle_layout.addWidget(self.slice_angle_input)
+                layout.addLayout(slice_angle_layout)
+
+                # Bowl Height
+                bowl_height_layout = QtWidgets.QHBoxLayout()
+                bowl_height_label = QtWidgets.QLabel("Bowl Height:")
+                self.bowl_height_input = QtWidgets.QLineEdit()
+                self.bowl_height_input.setText(str(self.bowl_height))
+                bowl_height_layout.addWidget(bowl_height_label)
+                bowl_height_layout.addWidget(self.bowl_height_input)
+                layout.addLayout(bowl_height_layout)
+
+                # Base Ring Radius
+                base_ring_radius_layout = QtWidgets.QHBoxLayout()
+                base_ring_radius_label = QtWidgets.QLabel("Base Ring Radius:")
+                self.base_ring_radius_input = QtWidgets.QLineEdit()
+                self.base_ring_radius_input.setText(str(self.base_ring_radius))
+                base_ring_radius_layout.addWidget(base_ring_radius_label)
+                base_ring_radius_layout.addWidget(self.base_ring_radius_input)
+                layout.addLayout(base_ring_radius_layout)
+
+                # Ring Thickness
+                ring_thickness_layout = QtWidgets.QHBoxLayout()
+                ring_thickness_label = QtWidgets.QLabel("Ring Thickness:")
+                self.ring_thickness_input = QtWidgets.QLineEdit()
+                self.ring_thickness_input.setText(str(self.ring_thickness))
+                ring_thickness_layout.addWidget(ring_thickness_label)
+                ring_thickness_layout.addWidget(self.ring_thickness_input)
+                layout.addLayout(ring_thickness_layout)
+
+                # Ring Width
+                ring_width_layout = QtWidgets.QHBoxLayout()
+                ring_width_label = QtWidgets.QLabel("Ring Width:")
+                self.ring_width_input = QtWidgets.QLineEdit()
+                self.ring_width_input.setText(str(self.ring_width))
+                ring_width_layout.addWidget(ring_width_label)
+                ring_width_layout.addWidget(self.ring_width_input)
+                layout.addLayout(ring_width_layout)
+
+                # Number of Rings
+                number_of_rings_layout = QtWidgets.QHBoxLayout()
+                number_of_rings_label = QtWidgets.QLabel("Number of Rings:")
+                self.number_of_rings_input = QtWidgets.QLineEdit()
+                self.number_of_rings_input.setText(str(self.number_of_rings))
+                number_of_rings_layout.addWidget(number_of_rings_label)
+                number_of_rings_layout.addWidget(self.number_of_rings_input)
+                layout.addLayout(number_of_rings_layout)
+
+                # Number of Slices
+                number_of_slices_layout = QtWidgets.QHBoxLayout()
+                number_of_slices_label = QtWidgets.QLabel("Number of Slices:")
+                self.number_of_slices_input = QtWidgets.QLineEdit()
+                self.number_of_slices_input.setText(str(self.number_of_slices))
+                number_of_slices_layout.addWidget(number_of_slices_label)
+                number_of_slices_layout.addWidget(self.number_of_slices_input)
+                layout.addLayout(number_of_slices_layout)                
                 # Add spacing
                 layout.addSpacing(20)
                 
@@ -95,9 +164,9 @@ class BowlFromABoard:
                 button_layout = QtWidgets.QHBoxLayout()
 
                 # Add button A
-                self.button_A = QtWidgets.QPushButton("Button A")
-                self.button_A.clicked.connect(self.bt_A_clicked)
-                button_layout.addWidget(self.button_A)
+                self.generate_bowl = QtWidgets.QPushButton("Make Bowl")
+                self.generate_bowl.clicked.connect(self.bt_generate_bowl_clicked)
+                button_layout.addWidget(self.generate_bowl)
 
                 # Add button A
                 self.button_close = QtWidgets.QPushButton("Close")
@@ -109,12 +178,12 @@ class BowlFromABoard:
                 layout.addStretch()
                 self.form.setLayout(layout)
 
-            def bt_A_clicked(self):
-                """Handler for Button A click"""
+            def bt_generate_bowl_clicked(self):
+                """Handler for Make Bowl click"""
                 import FreeCAD as App
                 self.update_values()
                 doc = App.ActiveDocument
-                App.Console.PrintMessage("Button A clicked\n")
+                App.Console.PrintMessage("Make Bowl clicked\n")
                 print(self.number_of_slices)
                 self.make_ring(0, 0, self.ring_thickness, self.base_ring_radius, self.slice_angle, "bottom", "Ring0")
                 for i in range(0,self.number_of_rings-2):
@@ -127,19 +196,20 @@ class BowlFromABoard:
                 bowl_width = (self.base_ring_radius+(self.ring_width*(self.number_of_rings)))*2
                 bowl_height = (self.slice_thickness*self.number_of_rings)+(2*self.slice_thickness)
                 box_list = []
-                for p in range(0,self.number_of_rings):
-                    for i in range(0,self.number_of_slices):
-                        box = doc.addObject("Part::Box", "Box")
-                        box.Length = bowl_width
-                        slice_width = bowl_width / self.number_of_slices
-                        #box.Width = slice_thickness
-                        box.Width = slice_width
-                        box.Height = bowl_height
-                        shift = bowl_width/2
+                if (True):
+                    for p in range(0,self.number_of_rings):
+                        for i in range(0,self.number_of_slices):
+                            box = doc.addObject("Part::Box", "Box")
+                            box.Length = bowl_width
+                            slice_width = bowl_width / self.number_of_slices
+                            #box.Width = slice_thickness
+                            box.Width = slice_width
+                            box.Height = bowl_height
+                            shift = bowl_width/2
 
-                        box.Placement = App.Placement(App.Vector(-(box.Length/2), -shift+(i*slice_width), 0), App.Rotation(0, 0, 0))
-                        box_list.append(box.Name)
-                        #box_group.addObject(box)
+                            box.Placement = App.Placement(App.Vector(-(box.Length/2), -shift+(i*slice_width), 0), App.Rotation(0, 0, 0))
+                            box_list.append(box.Name)
+                            #box_group.addObject(box)
                 if(True):
                     for a in range(0,len(self.clone_list)):
                         bp = BOPFeatures.BOPFeatures(App.activeDocument())
@@ -177,6 +247,13 @@ class BowlFromABoard:
                 #Update the local variables with the values in the text boxes
                 self.board_width = float(self.board_width_input.text())
                 self.slice_thickness = float(self.slice_thickness_input.text())
+                self.slice_angle = float(self.slice_angle_input.text())
+                self.bowl_height = float(self.bowl_height_input.text())
+                self.base_ring_radius = float(self.base_ring_radius_input.text())
+                self.ring_thickness = float(self.ring_thickness_input.text())
+                self.ring_width = float(self.ring_width_input.text())
+                self.number_of_rings = int(self.number_of_rings_input.text())
+                self.number_of_slices = int(self.number_of_slices_input.text())
                 
 
             def make_ring(self, inner_radius, start_height, ring_height, base_length, angle_deg, ring_type, ring_name):
@@ -231,19 +308,21 @@ class BowlFromABoard:
                 # Define the angle of revolution (360 degrees for full revolution)
                 angle = 360
 
-                # Create the revolve feature
-                revolve = doc.addObject("Part::Revolution", ring_name)
-                revolve.Source = sketch
-                revolve.Axis = axis
-                revolve.Angle = angle
-                view_obj = doc.getObject(ring_name)
-                view_obj.ViewObject.Transparency = 70
-                view_obj.Visibility = False
-                for i in range(0, self.number_of_slices):
-                # Create a linked clone
-                    cloned_object = Draft.clone(view_obj)
-                    cloned_object.Label = ring_name + "_1"
-                    self.clone_list.append(cloned_object.Name)
+                if (True):
+                    # Create the revolve feature
+                    revolve = doc.addObject("Part::Revolution", ring_name)
+                    revolve.Source = sketch
+                    revolve.Axis = axis
+                    revolve.Angle = angle
+                    view_obj = doc.getObject(ring_name)
+                    view_obj.ViewObject.Transparency = 70
+                    view_obj.Visibility = False
+                    for i in range(0, self.number_of_slices):
+                    # Create a linked clone
+                        cloned_object = Draft.clone(view_obj)
+                        cloned_object.Label = ring_name + "_1"
+                        self.clone_list.append(cloned_object.Name)
+                doc.recompute()
 
             
             if(False):

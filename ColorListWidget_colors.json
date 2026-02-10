@@ -1,0 +1,64 @@
+{
+  "colors": [
+    {
+      "name": "Pine",
+      "hex": "#cf8d5b"
+    },
+    {
+      "name": "Maple",
+      "hex": "#e8cba0"
+    },
+    {
+      "name": "Dark Walnut",
+      "hex": "#3e3131"
+    },
+    {
+      "name": "Oak",
+      "hex": "#d8b589"
+    },
+    {
+      "name": "Mahogany",
+      "hex": "#c04000"
+    },
+    {
+      "name": "Cherry",
+      "hex": "#7b3f3a"
+    },
+    {
+      "name": "Teak",
+      "hex": "#d19a6e"
+    },
+    {
+      "name": "Redwood",
+      "hex": "#a45a52"
+    },
+    {
+      "name": "Natural Pine",
+      "hex": "#f5d1a9"
+    },
+    {
+      "name": "Birch",
+      "hex": "#91754d"
+    },
+    {
+      "name": "Ebony (Black Bogwood)",
+      "hex": "#130f0e"
+    },
+    {
+      "name": "Cedar",
+      "hex": "#99755a"
+    },
+    {
+      "name": "Burlywood",
+      "hex": "#deb887"
+    },
+    {
+      "name": "Golden Oak",
+      "hex": "#e7b744"
+    },
+    {
+      "name": "Jacobean",
+      "hex": "#42291a"
+    }
+  ]
+}

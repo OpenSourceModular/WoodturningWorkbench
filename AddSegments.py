@@ -66,6 +66,7 @@ class AddSegments:
                 self.form.setWindowTitle("Add Segments to Bowl")
                 #Local Variables with Default Values
                 self.number_of_segments = getVarsetInt(self, "NumSegments")  # Number of segments around the bowl
+                print(self.number_of_segments)
                 self.bowl_height = getVarsetValue(self, "BowlHeight")  # Bowl height in mm
                 self.bowl_radius = getVarsetValue(self, "BowlRadius")  # Bowl radius in mm
                 self.layer_height = getVarsetValue(self, "LayerHeight")  # Layer height in mm

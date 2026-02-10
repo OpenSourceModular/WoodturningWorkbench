@@ -27,6 +27,8 @@ from AddCatenaryCurve import AddCatenaryCurve
 from BowlConstructionLines import BowlConstructionLines
 from SegmentSpreadsheet import SegmentSpreadsheet
 from BowlFromABoard import BowlFromABoard
+from ApplyColors import ApplyColors
+from About import About
 
 from pathlib import Path
 
@@ -39,7 +41,8 @@ try:
 	Gui.addCommand('SegmentSpreadsheet', SegmentSpreadsheet())
 	Gui.addCommand('BowlFromABoard', BowlFromABoard())
 	Gui.addCommand('AddVase', AddVase())
-	
+	Gui.addCommand('ApplyColors', ApplyColors())
+	Gui.addCommand('About', About())
 	
 except Exception as e:
 	FreeCAD.Console.PrintError(f"Error registering commands: {str(e)}\n")
@@ -54,8 +57,8 @@ class WoodturningWorkbench(Gui.Workbench):
 	def Initialize(self):
 		"""Initialize the workbench"""
 		# Add commands to toolbar and menu
-		self.appendToolbar("Woodturning Tools", ["AddVase","BowlConstructionLines", "AddSegments", "AddCatenaryCurve", "SegmentSpreadsheet", "BowlFromABoard"])
-		self.appendMenu("Woodturning Tools	", ["AddVase","BowlConstructionLines", "AddSegments","AddCatenaryCurve", "SegmentSpreadsheet", "BowlFromABoard"])
+		self.appendToolbar("Woodturning Tools", ["AddVase","BowlConstructionLines", "AddSegments",  "SegmentSpreadsheet", "BowlFromABoard", "ApplyColors","AddCatenaryCurve", "About"])
+		self.appendMenu("Woodturning Tools	", ["AddVase","BowlConstructionLines", "AddSegments", "SegmentSpreadsheet", "BowlFromABoard", "ApplyColors", "AddCatenaryCurve", "About"])
 		print("Woodturning Tools Workbench initialized")
 
 	def Activated(self):
