@@ -1,5 +1,5 @@
-#   Copyright (c) 2026 Justin Ahrens <justin@ahrens.net>        
-#                                                                         
+#   Copyright (c) 2026 Justin Ahrens <justin@ahrens.net>
+#
 #   This library is free software; you can redistribute it and/or
 #   modify it under the terms of the GNU Library General Public
 #   License as published by the Free Software Foundation; either
@@ -14,10 +14,8 @@
 #   License along with this library; see the file COPYING.LIB. If not,
 #   write to the Free Software Foundation, Inc., 59 Temple Place,
 #   Suite 330, Boston, MA  02111-1307, USA
-# 
-import FreeCAD	
-import FreeCADGui
-import Sketcher
+#
+import FreeCAD
 import Part
 
 class AddCatenaryCurve:
@@ -60,7 +58,7 @@ class AddCatenaryCurve:
 			sketch.addProperty("App::PropertyFloat", "XEnd", "Dimensions").XEnd=300.0
 			sketch.addProperty("App::PropertyFloat", "YStart", "Dimensions").YStart=0.0
 			sketch.addProperty("App::PropertyInteger", "NumPoints", "Dimensions").NumPoints=50
-			
+
 			print (sketch.Sag)
 			poles = []
 			for i in range(50 + 1):
@@ -72,11 +70,10 @@ class AddCatenaryCurve:
 			bspline.buildFromPoles(poles)
 
 			# Add the B-spline to the sketch
-			sketch.addGeometry(bspline, False)   
+			sketch.addGeometry(bspline, False)
 
-			# Recompute the document    
-			doc.recompute()             
+			# Recompute the document
+			doc.recompute()
 
 		except Exception as e:
 			FreeCAD.Console.PrintError(f"Error adding Catenary Curve sketch: {str(e)}\n")
-		pass
