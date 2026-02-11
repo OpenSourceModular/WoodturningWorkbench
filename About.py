@@ -86,6 +86,7 @@ class About:
 				
 				layout = QtWidgets.QVBoxLayout(self)
 				layout.setAlignment(QtCore.Qt.AlignCenter)
+				layout.addWidget(self.image_label)
 				self.text_edit = QtWidgets.QTextBrowser(self)
 				html_content = """
 				<h1>Welcome to WoodTurning Workbench</h1>
@@ -99,7 +100,7 @@ class About:
 
 				close_btn = QtWidgets.QPushButton("Close")
 				close_btn.clicked.connect(self.close)
-				layout.addWidget(self.image_label)
+				
 				layout.addWidget(close_btn)
 				self.setLayout(layout)
 

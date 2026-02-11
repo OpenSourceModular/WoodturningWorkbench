@@ -38,8 +38,8 @@ class AddVase:
         from pathlib import Path
         return {
             'Pixmap': str(Path(App.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "AddVase.svg"),  
-            'MenuText': 'Add Vase Profile',
-            'ToolTip': 'Add Vase Profile Command'
+            'MenuText': 'Add Vessel Profile',
+            'ToolTip': 'Add a Vase/Bowl profile to the document from an SVG file'
         }
 
     def IsActive(self):
