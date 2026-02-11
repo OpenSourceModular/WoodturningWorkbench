@@ -83,12 +83,25 @@ class About:
 
 
 
-
+				
 				layout = QtWidgets.QVBoxLayout(self)
+				layout.setAlignment(QtCore.Qt.AlignCenter)
+				self.text_edit = QtWidgets.QTextBrowser(self)
+				html_content = """
+				<h1>Welcome to WoodTurning Workbench</h1>
+				<p>This workbench provides tools for designing and simulating woodturning projects in FreeCAD.</p>
+				<p><a href="https://github.com/OpenSourceModular/WoodTurningWorkbench"</a></p>
+				"""
+				self.text_edit.setHtml(html_content)
+				
+				layout.addWidget(self.text_edit)
+
+
 				close_btn = QtWidgets.QPushButton("Close")
 				close_btn.clicked.connect(self.close)
 				layout.addWidget(self.image_label)
 				layout.addWidget(close_btn)
+				self.setLayout(layout)
 
 		dialog = AboutDialog()
 		# Make it modeless so you can interact with FreeCAD while the dialog is open
