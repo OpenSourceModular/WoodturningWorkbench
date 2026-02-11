@@ -23,7 +23,7 @@ from pathlib import Path
 from AddVase import AddVase
 from TaskPanelTemplate import TaskPanelTemplate
 from AddSegments import AddSegments
-from AddCatenaryCurve import AddCatenaryCurve
+from CatenaryCurve import CatenaryCurve
 from BowlConstructionLines import BowlConstructionLines
 from SegmentSpreadsheet import SegmentSpreadsheet
 from BowlFromABoard import BowlFromABoard
@@ -37,7 +37,7 @@ from pathlib import Path
 try:
 	Gui.addCommand('BowlConstructionLines', BowlConstructionLines())
 	Gui.addCommand('AddSegments', AddSegments())
-	Gui.addCommand('AddCatenaryCurve', AddCatenaryCurve())
+	Gui.addCommand('CatenaryCurve', CatenaryCurve())
 	Gui.addCommand('SegmentSpreadsheet', SegmentSpreadsheet())
 	Gui.addCommand('BowlFromABoard', BowlFromABoard())
 	Gui.addCommand('AddVase', AddVase())
@@ -57,8 +57,8 @@ class WoodturningWorkbench(Gui.Workbench):
 	def Initialize(self):
 		"""Initialize the workbench"""
 		# Add commands to toolbar and menu
-		self.appendToolbar("Woodturning Tools", ["AddVase","BowlConstructionLines", "AddSegments",  "SegmentSpreadsheet", "BowlFromABoard", "ApplyColors","AddCatenaryCurve", "About"])
-		self.appendMenu("Woodturning Tools	", ["AddVase","BowlConstructionLines", "AddSegments", "SegmentSpreadsheet", "BowlFromABoard", "ApplyColors", "AddCatenaryCurve", "About"])
+		self.appendToolbar("Woodturning Tools", ["AddVase","BowlConstructionLines", "AddSegments",  "SegmentSpreadsheet", "BowlFromABoard", "ApplyColors","CatenaryCurve", "About"])
+		self.appendMenu("Woodturning Tools	", ["AddVase","BowlConstructionLines", "AddSegments", "SegmentSpreadsheet", "BowlFromABoard", "ApplyColors", "CatenaryCurve", "About"])
 		print("Woodturning Tools Workbench initialized")
 
 	def Activated(self):
