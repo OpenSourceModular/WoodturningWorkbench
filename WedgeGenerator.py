@@ -29,6 +29,8 @@ import PySide.QtWidgets
 import Part
 import Draft
 from BOPTools import BOPFeatures
+import platform
+import os
 
 class WedgeGenerator:
     
@@ -56,11 +58,13 @@ class WedgeGenerator:
                 self.form = QtWidgets.QWidget()
                 self.form.setWindowTitle("Wedge Generator")
                 #Local Variables with Default Values
-                self.wedge_length = 100
+                self.wedge_length = 150
                 self.wedge_small_end_width = 50
                 self.number_of_segments = 16
-                self.wedge_thickness = 10
-                self.offset_distance = 12.7
+                self.wedge_thickness = 12.7
+                self.offset_distance = 16
+                self.cut_out_center = True
+                self.add_text_label = True
 
 
                 # Create layout
@@ -121,6 +125,19 @@ class WedgeGenerator:
 
                 # Add spacing
                 layout.addSpacing(20)
+
+                # Cut out center checkbox
+                self.cutout_checkbox = QtWidgets.QCheckBox("Cut out center")
+                self.cutout_checkbox.setChecked(self.cut_out_center)
+                layout.addWidget(self.cutout_checkbox)
+
+                # Add Text Label checkbox
+                self.textlabel_checkbox = QtWidgets.QCheckBox("Add Text Label")
+                self.textlabel_checkbox.setChecked(self.add_text_label)
+                layout.addWidget(self.textlabel_checkbox)
+
+                # Add spacing
+                layout.addSpacing(20)
                 
                 # Button layout
                 button_layout = QtWidgets.QHBoxLayout()
@@ -144,6 +161,38 @@ class WedgeGenerator:
                 """Handler for Make Wedge button click"""
                 import Draft
                 from BOPTools import BOPFeatures
+                
+                def get_font_file():
+                    """Get the appropriate font file path based on the operating system"""
+                    system = platform.system()
+                    print(f"Detected operating system: {system}")
+                    
+                    if system == "Windows":
+                        font_paths = [
+                            "C:/Windows/Fonts/arial.ttf",
+                            "C:/WINDOWS/Fonts/arial.ttf"
+                        ]
+                    elif system == "Darwin":  # macOS
+                        font_paths = [
+                            "/Library/Fonts/Arial.ttf",
+                            "/System/Library/Fonts/Supplemental/Arial.ttf",
+                            "/Library/Fonts/Arial.ttc"
+                        ]
+                    else:  # Linux and others
+                        font_paths = [
+                            "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf",
+                            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+                            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+                        ]
+                    
+                    # Return first font file that exists
+                    for font_path in font_paths:
+                        if os.path.exists(font_path):
+                            return font_path
+                    
+                    # Fallback to first path if none exist
+                    return font_paths[0]
+                
                 def make_trapezoid_sketch(a_sketch, small_end_width_l, wedge_length_, segment_angle_deg_l, x_offset):
                     import Sketcher
                     half_angle_rad = radians(segment_angle_deg_l / 2.0)
@@ -169,6 +218,10 @@ class WedgeGenerator:
                     # Get values from input fields
                     self.update_values()
                     
+                    # Get checkbox states
+                    self.cut_out_center = self.cutout_checkbox.isChecked()
+                    self.add_text_label = self.textlabel_checkbox.isChecked()
+                    
                     # Create a new sketch
                     doc = App.ActiveDocument
                     sketch = doc.addObject("Sketcher::SketchObject", "wedge")
@@ -178,32 +231,39 @@ class WedgeGenerator:
                     segment_angle_deg = 360.0 / self.number_of_segments
                     
                     make_trapezoid_sketch(sketch, self.wedge_small_end_width, self.wedge_length, segment_angle_deg, 0)
-                    make_trapezoid_sketch(sketch, self.wedge_small_end_width - (self.offset_distance * 2), self.wedge_length - (self.offset_distance * 2), segment_angle_deg, self.offset_distance)
+                    
+                    # Only create the inner trapezoid if cut_out_center is checked
+                    if self.cut_out_center:
+                        make_trapezoid_sketch(sketch, self.wedge_small_end_width - (self.offset_distance * 2), self.wedge_length - (self.offset_distance * 2), segment_angle_deg, self.offset_distance)
 
+                    sketch.Visibility = False  # Hide the sketch in the view
                     # Extrude the sketch in +Z by the wedge thickness
                     extrusion = doc.addObject("Part::Extrusion", "wedge_extrude")
                     extrusion.Base = sketch
                     extrusion.Dir = Vector(0, 0, self.wedge_thickness)
                     extrusion.Solid = True
                     extrusion.TaperAngle = 0
-                    # Recompute the document to update the view
-                    ss = Draft.make_shapestring(String=str(self.number_of_segments), FontFile="C:/WINDOWS/Fonts/arial.ttf", Size=6.0, Tracking=0.0)
-                    ss.Placement = App.Placement(App.Vector(5,(self.wedge_small_end_width/2)-8,self.wedge_thickness),App.Rotation(App.Vector(0,0,1),0))
-
-                    ss_extrusion = doc.addObject("Part::Extrusion", "text_extrude")
-                    ss_extrusion.Base = ss  
-                    ss_extrusion.Dir = Vector(0, 0, -2)
-                    ss_extrusion.Solid = True 
-
-                    doc.recompute()
+                    extrusion.Label = f"Wedge-{self.number_of_segments}-Segments"
                     
-                    # Create cut operation
-                    cut = doc.addObject("Part::Cut", "wedge_cut")
-                    cut.Base = extrusion
-                    cut.Tool = ss_extrusion      
-                         
-                    
+                    # Only create and cut the text label if add_text_label is checked
+                    if self.add_text_label:
+                        # Recompute the document to update the view
+                        font_file = get_font_file()
+                        ss = Draft.make_shapestring(String=str(self.number_of_segments), FontFile=font_file, Size=6.0, Tracking=0.0)
+                        ss.Placement = App.Placement(App.Vector(5,(self.wedge_small_end_width/2)-8,self.wedge_thickness),App.Rotation(App.Vector(0,0,1),0))
 
+                        ss_extrusion = doc.addObject("Part::Extrusion", "text_extrude")
+                        ss_extrusion.Base = ss  
+                        ss_extrusion.Dir = Vector(0, 0, -2)
+                        ss_extrusion.Solid = True 
+                        ss.Visibility = False  # Hide the original shape string in the view
+
+                        doc.recompute()
+             
+                        bp = BOPFeatures.BOPFeatures(doc)
+                        cut_result = bp.make_cut(["wedge_extrude", "text_extrude", ])
+                        cut_result.Label = f"Wedge-{self.number_of_segments}-Segments"
+                    
                     doc.recompute()
                     App.Console.PrintMessage(f"Wedge sketch created with angle {segment_angle_deg:.2f} degrees and {self.offset_distance}mm inward offset\n")
                     

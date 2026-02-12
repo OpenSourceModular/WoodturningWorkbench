@@ -196,7 +196,7 @@ class BowlFromABoard:
                 bowl_width = (self.base_ring_radius+(self.ring_width*(self.number_of_rings)))*2
                 bowl_height = (self.slice_thickness*self.number_of_rings)+(2*self.slice_thickness)
                 box_list = []
-                if (True):
+                if (False):
                     for p in range(0,self.number_of_rings):
                         for i in range(0,self.number_of_slices):
                             box = doc.addObject("Part::Box", "Box")
@@ -210,7 +210,7 @@ class BowlFromABoard:
                             box.Placement = App.Placement(App.Vector(-(box.Length/2), -shift+(i*slice_width), 0), App.Rotation(0, 0, 0))
                             box_list.append(box.Name)
                             #box_group.addObject(box)
-                if(True):
+                if(False):
                     for a in range(0,len(self.clone_list)):
                         bp = BOPFeatures.BOPFeatures(App.activeDocument())
                         new_common = bp.make_multi_common([box_list[a]] + [self.clone_list[a]])
