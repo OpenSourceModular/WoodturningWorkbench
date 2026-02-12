@@ -142,6 +142,8 @@ class WedgeGenerator:
 
             def bt_make_wedge(self):
                 """Handler for Make Wedge button click"""
+                import Draft
+                from BOPTools import BOPFeatures
                 def make_trapezoid_sketch(a_sketch, small_end_width_l, wedge_length_, segment_angle_deg_l, x_offset):
                     import Sketcher
                     half_angle_rad = radians(segment_angle_deg_l / 2.0)
@@ -185,6 +187,23 @@ class WedgeGenerator:
                     extrusion.Solid = True
                     extrusion.TaperAngle = 0
                     # Recompute the document to update the view
+                    ss = Draft.make_shapestring(String=str(self.number_of_segments), FontFile="C:/WINDOWS/Fonts/arial.ttf", Size=6.0, Tracking=0.0)
+                    ss.Placement = App.Placement(App.Vector(5,(self.wedge_small_end_width/2)-8,self.wedge_thickness),App.Rotation(App.Vector(0,0,1),0))
+
+                    ss_extrusion = doc.addObject("Part::Extrusion", "text_extrude")
+                    ss_extrusion.Base = ss  
+                    ss_extrusion.Dir = Vector(0, 0, -2)
+                    ss_extrusion.Solid = True 
+
+                    doc.recompute()
+                    
+                    # Create cut operation
+                    cut = doc.addObject("Part::Cut", "wedge_cut")
+                    cut.Base = extrusion
+                    cut.Tool = ss_extrusion      
+                         
+                    
+
                     doc.recompute()
                     App.Console.PrintMessage(f"Wedge sketch created with angle {segment_angle_deg:.2f} degrees and {self.offset_distance}mm inward offset\n")
                     

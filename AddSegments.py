@@ -544,6 +544,7 @@ class AddSegments:
                 doc.recompute()				
 
             def	bt_delete_bowl_solid_click(self):
+                
                 print("Deleting Bowl Solid")
                 doc = App.ActiveDocument
                 if doc:
