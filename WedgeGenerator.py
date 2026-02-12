@@ -142,6 +142,27 @@ class WedgeGenerator:
 
             def bt_make_wedge(self):
                 """Handler for Make Wedge button click"""
+                def make_trapezoid_sketch(a_sketch, small_end_width_l, wedge_length_, segment_angle_deg_l, x_offset):
+                    import Sketcher
+                    half_angle_rad = radians(segment_angle_deg_l / 2.0)
+                    y_half_width_long = (small_end_width_l / 2.0) + wedge_length_ * tan(half_angle_rad)
+                    p1 = Vector(0+ x_offset, -small_end_width_l / 2.0, 0)  # Bottom-left
+                    p2 = Vector(0+ x_offset, small_end_width_l / 2.0, 0)   # Top-left
+                    # Long end (at x=wedge_length)
+                    p3 = Vector(wedge_length_+x_offset, y_half_width_long, 0)      # Top-right
+                    p4 = Vector(wedge_length_+x_offset, -y_half_width_long, 0)     # Bottom-right
+                    line0 = a_sketch.addGeometry(Part.LineSegment(p1, p2))
+                    # Line from p2 to p3 (top angled side)
+                    line1 = a_sketch.addGeometry(Part.LineSegment(p2, p3))
+                    # Line from p3 to p4 (long end)
+                    line2 = a_sketch.addGeometry(Part.LineSegment(p3, p4))
+                    # Line from p4 to p1 (bottom angled side)
+                    line3 = a_sketch.addGeometry(Part.LineSegment(p4, p1))
+                    # Constrain endpoints to be coincident
+                    a_sketch.addConstraint(Sketcher.Constraint('Coincident', line0, 2, line1, 1))
+                    a_sketch.addConstraint(Sketcher.Constraint('Coincident', line1, 2, line2, 1))
+                    a_sketch.addConstraint(Sketcher.Constraint('Coincident', line2, 2, line3, 1))
+                    a_sketch.addConstraint(Sketcher.Constraint('Coincident', line3, 2, line0, 1))
                 try:
                     # Get values from input fields
                     self.update_values()
@@ -153,69 +174,16 @@ class WedgeGenerator:
                     
                     # Calculate the angle for each segment (in radians)
                     segment_angle_deg = 360.0 / self.number_of_segments
-                    half_angle_rad = radians(segment_angle_deg / 2.0)
                     
-                    # Calculate Y coordinates at the long end
-                    
-                    # Start with the half-width of the short end, then add the expansion
-                    y_half_width_long = (self.wedge_small_end_width / 2.0) + self.wedge_length * tan(half_angle_rad)
-                    offset_small = self.wedge_small_end_width / 2.0 - self.offset_distance
-                    y_half_width_long_offset = offset_small + (self.wedge_length-self.offset_distance) * tan(half_angle_rad)
-                    # Create offset lines 12.7mm inward
-                                      
-                    # Define the four vertices of the trapezoid
-                    # Short end (at x=0, centered on Y axis)
-                    p1 = Vector(0, -self.wedge_small_end_width / 2.0, 0)  # Bottom-left
+                    make_trapezoid_sketch(sketch, self.wedge_small_end_width, self.wedge_length, segment_angle_deg, 0)
+                    make_trapezoid_sketch(sketch, self.wedge_small_end_width - (self.offset_distance * 2), self.wedge_length - (self.offset_distance * 2), segment_angle_deg, self.offset_distance)
 
-                    p2 = Vector(0, self.wedge_small_end_width / 2.0, 0)   # Top-left
-                    
-                    # Long end (at x=wedge_length)
-                    p3 = Vector(self.wedge_length, y_half_width_long, 0)      # Top-right
-                    
-                    p4 = Vector(self.wedge_length, -y_half_width_long, 0)     # Bottom-right
-                    
-                    p5 = Vector(self.offset_distance, -offset_small, 0)  # Bottom-left offset
-                    p6 = Vector(self.offset_distance, offset_small, 0)   # Top-left offset
-                    p7 = Vector(self.wedge_length-self.offset_distance, y_half_width_long_offset, 0)  # Top-right offset
-                    p8 = Vector(self.wedge_length-self.offset_distance, -y_half_width_long_offset, 0)  # Bottom-right offset
-
-
-                    
-                    # Add the four lines to form the trapezoid
-                    # Line from p1 to p2 (short end)
-                    sketch.addGeometry(Part.LineSegment(p1, p2))
-                    
-                    
-                    # Line from p2 to p3 (top angled side)
-                    sketch.addGeometry(Part.LineSegment(p2, p3))
-                    
-                    # Line from p3 to p4 (long end)
-                    sketch.addGeometry(Part.LineSegment(p3, p4))
-                    
-                    # Line from p4 to p1 (bottom angled side)
-                    sketch.addGeometry(Part.LineSegment(p4, p1))
-
-                    sketch.addGeometry(Part.LineSegment(p5, p6))
-                    sketch.addGeometry(Part.LineSegment(p6, p7))
-                    sketch.addGeometry(Part.LineSegment(p7, p8))
-                    sketch.addGeometry(Part.LineSegment(p8, p5))
-
-                    
-                    # Add coincident constraints to close the trapezoid
-                    import Sketcher
-                    # Constrain end of line 0 to start of line 1
-                    sketch.addConstraint(Sketcher.Constraint('Coincident', 0, 2, 1, 1))
-                    # Constrain end of line 1 to start of line 2
-                    sketch.addConstraint(Sketcher.Constraint('Coincident', 1, 2, 2, 1))
-                    # Constrain end of line 2 to start of line 3
-                    sketch.addConstraint(Sketcher.Constraint('Coincident', 2, 2, 3, 1))
-                    # Constrain end of line 3 to start of line 0
-                    sketch.addConstraint(Sketcher.Constraint('Coincident', 3, 2, 0, 1))
-                    
-
-                    
-                    
-                    
+                    # Extrude the sketch in +Z by the wedge thickness
+                    extrusion = doc.addObject("Part::Extrusion", "wedge_extrude")
+                    extrusion.Base = sketch
+                    extrusion.Dir = Vector(0, 0, self.wedge_thickness)
+                    extrusion.Solid = True
+                    extrusion.TaperAngle = 0
                     # Recompute the document to update the view
                     doc.recompute()
                     App.Console.PrintMessage(f"Wedge sketch created with angle {segment_angle_deg:.2f} degrees and {self.offset_distance}mm inward offset\n")
