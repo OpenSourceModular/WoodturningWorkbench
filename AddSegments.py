@@ -762,6 +762,9 @@ class AddSegments:
                     print(f"b={b} l={l} m={m} n={n} o={o}")
                     max_x = max(l, m, n, o)
                     min_x = min(l, m, n, o)
+                    a = min_x - (math.cos(math.radians(180/self.bowl_num_segments))*min_x)
+                    min_x = min_x - a
+                    print(f"max_x={max_x} min_x={min_x} a={a}")
                     seg_length = max_x - min_x
                     if b==0 and self.solid_bottom:
                         self.list_of_segment_parameters.append([self.number_of_segments, max_x+self.fudge, max_x+self.fudge, list_of_points[b].y, list_of_points[b+1].y-list_of_points[b].y, False])
