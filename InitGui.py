@@ -21,6 +21,7 @@ import FreeCADGui as Gui
 from pathlib import Path
 
 from AddVase import AddVase
+from RotateRings import RotateRings
 from TaskPanelTemplate import TaskPanelTemplate
 from AddSegments import AddSegments
 from CatenaryCurve import CatenaryCurve
@@ -40,6 +41,7 @@ try:
 	Gui.addCommand('AddSegments', AddSegments())
 	Gui.addCommand('CatenaryCurve', CatenaryCurve())
 	Gui.addCommand('SegmentSpreadsheet', SegmentSpreadsheet())
+	Gui.addCommand('RotateRings', RotateRings())
 	Gui.addCommand('BowlFromABoard', BowlFromABoard())
 	Gui.addCommand('AddVase', AddVase())
 	Gui.addCommand('ApplyColors', ApplyColors())
@@ -60,8 +62,8 @@ class WoodturningWorkbench(Gui.Workbench):
 	def Initialize(self):
 		"""Initialize the workbench"""
 		# Add commands to toolbar and menu
-		self.appendToolbar("Woodturning Tools", ["AddVase","BowlConstructionLines", "AddSegments",  "SegmentSpreadsheet", "Separator", "BowlFromABoard", "ApplyColors","CatenaryCurve", "WedgeGenerator", "Separator", "About"])
-		self.appendMenu("Woodturning Tools	", ["AddVase","BowlConstructionLines", "AddSegments", "SegmentSpreadsheet", "Separator", "BowlFromABoard", "ApplyColors", "CatenaryCurve", "WedgeGenerator", "Separator","About"])
+		self.appendToolbar("Woodturning Tools", ["AddVase","BowlConstructionLines", "AddSegments",  "SegmentSpreadsheet", "RotateRings", "Separator", "BowlFromABoard", "ApplyColors","CatenaryCurve", "WedgeGenerator", "Separator", "About"])
+		self.appendMenu("Woodturning Tools	", ["AddVase","BowlConstructionLines", "AddSegments", "SegmentSpreadsheet", "RotateRings", "Separator", "BowlFromABoard", "ApplyColors", "CatenaryCurve", "WedgeGenerator", "Separator","About"])
 		print("Woodturning Tools Workbench initialized")
 
 	def Activated(self):

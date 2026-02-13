@@ -21,7 +21,7 @@ import Sketcher
 import Part
 
 class ApplyColors:
-	"""Command to add a catenary curve sketch"""
+	"""Command to apply colors to selected objects in FreeCAD."""
 	def __init__(self):
 		pass
 	#    obj.Proxy = self
