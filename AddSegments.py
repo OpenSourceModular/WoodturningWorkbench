@@ -622,25 +622,7 @@ class AddSegments:
                 except:
                     self.show_error_popup("Missing Sketch", "A sketch named 'BowlProfileSketch' was not found in the document. Please run the Add Construction Lines command first.")
                     return
-                
-                '''
-                list_of_points = []
-                for i, geo in enumerate(sketch.Geometry):
-                    # Check if the geometry is a point
-                    if geo.TypeId == 'Part::GeomPoint':
-                        #point_count += 1
-                        list_of_points.append(App.Vector(geo.X, geo.Y, geo.Z))
-                        print(geo.Y)
-
-                if not list_of_points:
-                    print(f"No point geometries found in sketch '{sketch.Name}'.")
-                    return
-
-                if len(list_of_points) < 2:
-                    print("Need at least 2 points to create a BSpline.")
-                    return
-                '''
-                                # Collect point geometries
+                # Collect point geometries
                 poles = []
                 list_of_points = []
                 self.list_of_segment_names = []  
@@ -713,23 +695,8 @@ class AddSegments:
                 obj = doc.addObject("Part::Feature", f"Segment_000")
                 
                 obj.Shape = shape
-                return obj.Name
+                return obj.Name 
             
-            '''def bt_rotate_segments_click(self):
-                doc = App.ActiveDocument
-                rotate_angle = 15
-                for name in self.list_of_segment_names:
-                    print(name)
-                    obj = doc.getObject(name)
-                    obj.ViewObject.Transparency = 20
-                    another_obj = Draft.make_polar_array(obj, number=12, angle=360.0, center=App.Vector(0.0, 0.0, 0.0), use_link=True)
-                    another_obj.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,0,1),rotate_angle))
-                    another_obj.Label = "Ring_001"
-                    rotate_angle = rotate_angle + 15
-                    print(name)
-                    print(rotate_angle)
-                doc.recompute()
-            '''   
             def bt_add_segments_click(self):
                 doc = App.ActiveDocument
                 print("Adding Segments")
