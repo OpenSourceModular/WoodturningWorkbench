@@ -16,22 +16,24 @@
 #   Suite 330, Boston, MA  02111-1307, USA
 # 
 
-import math
-from pydoc import doc
-from unicodedata import name
+"""
+This module defines the AddVessel command for the Woodturning Workbench in FreeCAD.
+The AddVessel command allows users to import an SVG file as a vessel profile, scale it
+according to specified dimensions, and position it in the document for use in woodturning design.
+"""
 import FreeCAD as App
 import FreeCADGui as Gui
 from FreeCAD import Vector
-from math import cos, sin, pi, radians, tan
-import PySide.QtGui
-import PySide.QtCore
-import PySide.QtWidgets
-import Part
-import Draft
-from BOPTools import BOPFeatures
 from varsetOps import setVarsetValue, getVarsetValue
+try:
+    from PySide import QtGui, QtCore, QtWidgets
+except ImportError:
+    import importlib
+    QtGui = importlib.import_module("PySide2.QtGui")
+    QtCore = importlib.import_module("PySide2.QtCore")
+    QtWidgets = importlib.import_module("PySide2.QtWidgets")
 
-class AddVase:
+class AddVessel:
     
     def GetResources(self):
         """Return the command resources"""
@@ -48,19 +50,18 @@ class AddVase:
 
     def Activated(self):
         """Execute the command"""
-        class AddVasePanel:
+        class AddVesselPanel:
             #Creates the Task Panel
             def __init__(self):
                 import FreeCAD
-                import FreeCADGui
-                from PySide import QtGui, QtCore, QtWidgets
                 from pathlib import Path
                 doc = FreeCAD.activeDocument()	
                 self.form = QtWidgets.QWidget()
-                self.form.setWindowTitle("Import Vessel SVG")
+                self.form.setWindowTitle("Import Vessel Profile from SVG")
                 #Local Variables with Default Values
                 self.svg_height = 254  # Height to scale the SVG to (mm)
                 self.svg_width = 100  # Width to scale the SVG to (mm), if None it will be scaled proportionally based on height
+                self.num_vessels = 9
                 if not doc.getObject("BowlVariables"):
                     self.varset = doc.addObject("App::VarSet", "BowlVariables")
                     # Add a variable (property) to the VarSet
@@ -83,6 +84,7 @@ class AddVase:
                 text_box_layout = QtWidgets.QHBoxLayout()
                 image_y_size_label = QtWidgets.QLabel("Image Height(mm):")
                 self.image_y_size_input = QtWidgets.QLineEdit()
+                self.image_y_size_input.setToolTip("Image height in mm.")
                 self.image_y_size_input.setText("254")
                 self.image_y_size_input.editingFinished.connect(lambda: self.update_text_boxes('y-mm'))
                 text_box_layout.addWidget(image_y_size_label)
@@ -90,15 +92,16 @@ class AddVase:
                 
                 image_x_size_label = QtWidgets.QLabel("Image Width(mm):")
                 self.image_x_size_input = QtWidgets.QLineEdit()
+                self.image_x_size_input.setToolTip("Image width in mm.")
                 self.image_x_size_input.setText("100")
                 self.image_x_size_input.editingFinished.connect(lambda: self.update_text_boxes('x-mm'))
                 text_box_layout.addWidget(image_x_size_label)
                 text_box_layout.addWidget(self.image_x_size_input)
 
-
                 text_box2_layout = QtWidgets.QHBoxLayout()
                 image_y_size_in_label = QtWidgets.QLabel("Image Height(in):")
                 self.image_y_size_in_input = QtWidgets.QLineEdit()
+                self.image_y_size_in_input.setToolTip("Image height in inches.")
                 self.image_y_size_in_input.setText(str(round(self.svg_height / 25.4, 2)))
                 self.image_y_size_in_input.editingFinished.connect(lambda: self.update_text_boxes('y-in'))
                 text_box2_layout.addWidget(image_y_size_in_label)
@@ -106,6 +109,7 @@ class AddVase:
                 
                 image_x_size_in_label = QtWidgets.QLabel("Image Width(in):")
                 self.image_x_size_in_input = QtWidgets.QLineEdit()
+                self.image_x_size_in_input.setToolTip("Image width in inches.")
                 self.image_x_size_in_input.setText(str(round(self.svg_width / 25.4, 2)))
                 self.image_x_size_in_input.editingFinished.connect(lambda: self.update_text_boxes('x-in'))
                 text_box2_layout.addWidget(image_x_size_in_label)
@@ -128,65 +132,42 @@ class AddVase:
                 layout.addLayout(text_box2_layout)
                 layout.addWidget(scaling_group)
 
-                vases_layout = QtWidgets.QHBoxLayout()
-                image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase1.png"
-                btn1 = QtWidgets.QPushButton()
-                btn1.setIcon(QtGui.QIcon(str(image_path)))
-                btn1.setIconSize(QtCore.QSize(48, 48))   # icon display size
-                btn1.clicked.connect(self.bt_click_vase1)
+                def add_vessel_button(vessel_number):
+                    """
+                    Helper function to create a button for adding a vessel profile
+                    """
+                    image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / f"vase{vessel_number}.png"
+                    button = QtWidgets.QPushButton()
+                    button.setIcon(QtGui.QIcon(str(image_path)))
+                    button.setIconSize(QtCore.QSize(48, 48))  # Set the icon size
+                    return button
 
-                image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase2.png"
-                btn2 = QtWidgets.QPushButton()
-                btn2.setIcon(QtGui.QIcon(str(image_path)))
-                btn2.setIconSize(QtCore.QSize(48, 48))   # icon display size
-                btn2.clicked.connect(self.bt_click_vase2)					
-
-	
-
-                image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase3.png"
-                btn3 = QtWidgets.QPushButton()
-                btn3.setIcon(QtGui.QIcon(str(image_path)))
-                btn3.setIconSize(QtCore.QSize(48, 48))   # icon display size
-                btn3.clicked.connect(self.bt_click_vase3)
-
-                image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase4.png"
-                btn4 = QtWidgets.QPushButton()
-                btn4.setIcon(QtGui.QIcon(str(image_path)))
-                btn4.setIconSize(QtCore.QSize(48, 48))   # icon display size
-                btn4.clicked.connect(self.bt_click_vase4)
-
-                vases_layout.addWidget(btn1)
-                vases_layout.addWidget(btn2)
-                vases_layout.addWidget(btn3)
-                vases_layout.addWidget(btn4)
-                layout.addLayout(vases_layout)
-
-                vases_layout2 = QtWidgets.QHBoxLayout()
-                image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase5.png"
-                btn5 = QtWidgets.QPushButton()
-                btn5.setIcon(QtGui.QIcon(str(image_path)))
-                btn5.setIconSize(QtCore.QSize(48, 48))   # icon display size
-                btn5.clicked.connect(self.bt_click_vase5)
-
-                image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase6.png"
-                btn6 = QtWidgets.QPushButton()
-                btn6.setIcon(QtGui.QIcon(str(image_path)))
-                btn6.setIconSize(QtCore.QSize(48, 48))   # icon display size
-                btn6.clicked.connect(self.bt_click_vase6)					
-
-                vases_layout2.addWidget(btn5)
-                vases_layout2.addWidget(btn6)
-                layout.addLayout(vases_layout2)
-
+                p = self.num_vessels//4
+                if self.num_vessels % 4 != 0:
+                    p += 1
+                button_index = 1
+                for i in range(p):
+                    button_layout = QtWidgets.QHBoxLayout()
+                    for j in range(4):
+                        if button_index <= self.num_vessels:
+                            button = add_vessel_button(button_index)
+                            button.setToolTip("Import this vessel profile")
+                            button.clicked.connect(lambda checked, num=button_index: self.bt_add_vessel_clicked(f"vase{num}.svg"))
+                            button_layout.addWidget(button)
+                            button_index += 1
+                    layout.addLayout(button_layout)
+                
                 # Button layout
                 button_layout = QtWidgets.QHBoxLayout()
 
                 # Add Bowl Outlines button
                 self.browse_vase_button = QtWidgets.QPushButton("Browse SVG")
                 self.browse_vase_button.clicked.connect(self.bt_browse_vase)
+                self.browse_vase_button.setToolTip("Browse for a custom SVG file to import as a vessel profile")
 
                 self.delete_vase_button = QtWidgets.QPushButton("Delete Vase")
                 self.delete_vase_button.clicked.connect(self.bt_delete_vase)
+                self.delete_vase_button.setToolTip("Delete all vessel profiles")
 
                 self.cancel_button = QtWidgets.QPushButton("Close")
                 self.cancel_button.clicked.connect(self.on_cancel)
@@ -200,17 +181,22 @@ class AddVase:
                 layout.addStretch()
                 
                 self.form.setLayout(layout)
-
-            def set_tooltips(self):
-                self.add_vase_button.setToolTip("Add the Vase to the document")
+ 
+                
 
             def update_values(self):
-                #Update the local variables with the values in the text boxes
+                """
+                Update internal variables based on text box values and scaling preference
+                """
                 self.svg_height = float(self.image_y_size_input.text())
                 self.svg_width = float(self.image_x_size_input.text()) 
                 self.scale_by_y = self.scale_by_y_radio.isChecked()
 
             def update_text_boxes(self, source):
+                """
+                Update text boxes based on the source of the change
+                If a user changes a mm box, update the corresponding inch box and vice versa. Also update internal variables.
+                """
                 print("Updating text boxes")
                 print(source)
                 if source == 'y-mm':
@@ -237,39 +223,16 @@ class AddVase:
                         self.image_x_size_input.setText(str(round(self.svg_width, 2)))
                     except ValueError:
                         pass  # Ignore invalid input
-            def bt_add_vase_click_it(self):
-                vase_name = "vase1.svg"
-                self.bt_add_vase_clicked(vase_name)
-
-            def bt_click_vase1(self):
-                vase_name = "vase1.svg"
-                self.bt_add_vase_clicked(vase_name)
-
-            def bt_click_vase2(self):
-                vase_name = "vase2.svg"
-                self.bt_add_vase_clicked(vase_name)
             
-            def bt_click_vase3(self):
-                vase_name = "vase3.svg"
-                self.bt_add_vase_clicked(vase_name)	
-            
-            def bt_click_vase4(self):
-                vase_name = "vase4.svg"
-                self.bt_add_vase_clicked(vase_name)	
-
-            def bt_click_vase5(self):
-                vase_name = "vase5.svg"
-                self.bt_add_vase_clicked(vase_name)	
-            
-            def bt_click_vase6(self):
-                vase_name = "vase6.svg"
-                self.bt_add_vase_clicked(vase_name)	
-            
-            def bt_add_vase_clicked(self, vase_name):
+            def bt_add_vessel_clicked(self, vase_name):
+                """
+                Handle click event for adding a vessel profile. 
+                This will add the specified SVG file as an image object, scale it according 
+                to the current settings, and position it in the document so that the origin is at the bottom middle.                       
+                """
                 self.update_values()
                 try:
                     import FreeCAD
-                    
                     from freecad import module_io
                     doc = FreeCAD.ActiveDocument
                     from pathlib import Path
@@ -277,10 +240,7 @@ class AddVase:
                     image = str(Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / vase_name )
                     #image += "vase1.png"
                     a_vase = module_io.OpenInsertObject("FreeCADGui", image, "insert", "Unnamed")
-                    
-                    
                     doc.recompute()
-                    FreeCAD.Console.PrintMessage("Vase added\n")
                     
                     for obj in doc.Objects:
                         print(obj.Name, obj.TypeId)
@@ -323,12 +283,16 @@ class AddVase:
                     doc.recompute()
                     Gui.activeDocument().activeView().viewFront()
                     Gui.SendMsgToActiveView("ViewFit")
+                    Gui.activeDocument().activeView().setAxisCross(True)
                     
                 except Exception as e:
                     FreeCAD.Console.PrintError(f"Error adding vase: {str(e)}\n")
 
             def bt_delete_vase(self):
-                """Delete any image objects that start with 'vase'"""
+                """
+                Delete any image objects that start with 'vase' in the document. 
+                This is a simple way to remove previously added vessel profiles.
+                """
                 try:
                     import FreeCAD
                     doc = FreeCAD.ActiveDocument
@@ -343,11 +307,12 @@ class AddVase:
                     FreeCAD.Console.PrintError(f"Error deleting vase: {str(e)}\n")
 
             def bt_browse_vase(self):
-                """Open file browser to select a custom SVG file"""
+                """
+                Open a file dialog to browse for an SVG file, then add and scale it as a vessel profile
+                """
                 try:
                     import FreeCAD
                     from pathlib import Path
-                    from PySide import QtWidgets
                     
                     # Open file dialog
                     file_dialog = QtWidgets.QFileDialog()
@@ -374,7 +339,9 @@ class AddVase:
                     FreeCAD.Console.PrintError(f"Error browsing vase file: {str(e)}\n")
 
             def _add_and_scale_vase(self, file_path):
-                """Helper method to add and scale a vase SVG file"""
+                """
+                Helper method to add and scale a vase SVG file
+                """
                 try:
                     import FreeCAD
                     from freecad import module_io
@@ -445,10 +412,9 @@ class AddVase:
             
             def getStandardButtons(self):
                 """Define which standard buttons to show (0 = none, we use custom buttons)"""
-                #return int(QtWidgets.QDialogButtonBox.NoButton)
                 return 0		
         try:
-            panel = AddVasePanel()
+            panel = AddVesselPanel()
     
             # Show the task panel in FreeCAD
             Gui.Control.showDialog(panel)

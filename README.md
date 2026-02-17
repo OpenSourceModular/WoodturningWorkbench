@@ -28,7 +28,31 @@ Steps:
    Pressing the intersect button will intersect each of the segments with the bowl solid which will show what the segments look like after turning.
    Pressing the Array button will create copies of the segments and turn them into a full ring.
 
-## Usage
+### Apply Colors
+Opens a modeless dialog for maintaining a color list and applying colors to selected objects.
 
-1. Select the Sample workbench from the workbench dropdown
-2. Click on the toolbar buttons or use the menu items to execute the commands
+- **Load Colors** opens a file picker and loads colors from a `.json` file.
+- **Save Current List** opens a save dialog and lets you choose the output filename.
+- Saving writes a plain JSON list format.
+- Loading supports both the plain list format and the legacy wrapped format.
+
+Supported plain list format:
+
+```json
+[
+   { "name": "Walnut Brown", "hex": "#773F1A" },
+   { "name": "Saddle Brown", "hex": "#8B4513" }
+]
+```
+
+Also accepted when loading (legacy format):
+
+```json
+{
+   "colors": [
+      { "name": "Walnut Brown", "hex": "#773F1A" },
+      { "name": "Saddle Brown", "hex": "#8B4513" }
+   ]
+}
+```
+

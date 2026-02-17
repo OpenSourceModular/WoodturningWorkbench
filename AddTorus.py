@@ -23,9 +23,13 @@ import FreeCAD as App
 import FreeCADGui as Gui
 from FreeCAD import Vector
 from math import cos, sin, pi, radians, tan
-import PySide.QtGui
-import PySide.QtCore
-import PySide.QtWidgets
+try:
+    from PySide import QtGui, QtCore, QtWidgets
+except ImportError:
+    import importlib
+    QtGui = importlib.import_module("PySide2.QtGui")
+    QtCore = importlib.import_module("PySide2.QtCore")
+    QtWidgets = importlib.import_module("PySide2.QtWidgets")
 import Part
 import Draft
 from BOPTools import BOPFeatures
@@ -50,8 +54,7 @@ class AddTorus:
         class AddTorusPanel:
             #Creates the Task Panel
             def __init__(self):
-                
-                from PySide import QtGui, QtCore, QtWidgets	
+
                 self.form = QtWidgets.QWidget()
                 self.form.setWindowTitle("AddTorus")
                 #Local Variables with Default Values

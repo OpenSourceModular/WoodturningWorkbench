@@ -20,6 +20,13 @@ import FreeCAD
 import FreeCADGui
 import Sketcher
 import Part
+try:
+	from PySide import QtWidgets, QtCore, QtGui
+except ImportError:
+	import importlib
+	QtGui = importlib.import_module("PySide2.QtGui")
+	QtCore = importlib.import_module("PySide2.QtCore")
+	QtWidgets = importlib.import_module("PySide2.QtWidgets")
 
 class About:
 	"""Command to add a catenary curve sketch"""
@@ -46,7 +53,6 @@ class About:
 	def Activated(self):
 		"""Execute the command"""
 		import FreeCAD as App
-		from PySide import QtWidgets, QtCore, QtGui
 		
 		class AboutDialog(QtWidgets.QDialog):
 			import json
@@ -58,7 +64,6 @@ class About:
 
 			def init_ui(self):
 				import FreeCADGui
-				from PySide import QtWidgets, QtCore, QtGui
 				from pathlib import Path
 				"""Initialize the user interface."""
 				self.setWindowTitle("WoodTurning Workbench About Page")

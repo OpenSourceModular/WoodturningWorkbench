@@ -19,6 +19,16 @@ import FreeCAD
 import FreeCADGui
 import Sketcher
 import Part
+import json
+import os
+import random
+try:
+	from PySide import QtWidgets, QtCore, QtGui
+except ImportError:
+	import importlib
+	QtGui = importlib.import_module("PySide2.QtGui")
+	QtCore = importlib.import_module("PySide2.QtCore")
+	QtWidgets = importlib.import_module("PySide2.QtWidgets")
 
 class ApplyColors:
 	"""Command to apply colors to selected objects in FreeCAD."""
@@ -45,11 +55,8 @@ class ApplyColors:
 	def Activated(self):
 		"""Execute the command"""
 		import FreeCAD as App
-		from PySide import QtWidgets, QtCore, QtGui
 		
 		class ColorListWidget(QtWidgets.QDialog):
-			import json
-			import os
 			def __init__(self):
 				super().__init__()
 				self.colors = []  # Store color entries: {"name": str, "color": QColor}
@@ -70,7 +77,6 @@ class ApplyColors:
 
 			def init_ui(self):
 				import FreeCADGui
-				from PySide import QtWidgets, QtCore, QtGui
 				"""Initialize the user interface."""
 				self.setWindowTitle("Apply Colors Dialog")
 				self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
@@ -107,6 +113,10 @@ class ApplyColors:
 				apply_color_to_all_btn = QtWidgets.QPushButton("Apply Color to All Segments")
 				apply_color_to_all_btn.clicked.connect(self.apply_color_to_all_segments)
 				right_layout.addWidget(apply_color_to_all_btn)
+
+				random_colors_btn = QtWidgets.QPushButton("Random Colors")
+				random_colors_btn.clicked.connect(self.bt_random_colors)
+				right_layout.addWidget(random_colors_btn)
 
 				select_ring_btn = QtWidgets.QPushButton("Select Ring")
 				select_ring_btn.clicked.connect(self.select_ring_click)
@@ -174,6 +184,10 @@ class ApplyColors:
 				bottom_2_layout.addWidget(self.clear_btn)
 				
 				bottom_3_layout = QtWidgets.QHBoxLayout()
+				self.load_btn = QtWidgets.QPushButton("Load Colors")
+				self.load_btn.clicked.connect(self.load_colors_from_json)
+				bottom_3_layout.addWidget(self.load_btn)
+
 				# Save current list button
 				self.save_btn = QtWidgets.QPushButton("Save Current List")
 				self.save_btn.clicked.connect(self.save_colors_to_json)
@@ -279,6 +293,36 @@ class ApplyColors:
 					FreeCADGui.Selection.addSelection(obj)
 				self.apply_color()
 				FreeCADGui.Selection.clearSelection()
+				doc.recompute()
+
+			def bt_random_colors(self):
+				"""Assign random colors from the current list to all objects labeled Ring*."""
+				doc = FreeCAD.activeDocument()
+				if not doc:
+					QtWidgets.QMessageBox.warning(self, "Error", "No active document in FreeCAD.")
+					return
+
+				if not self.colors:
+					QtWidgets.QMessageBox.warning(self, "Error", "No colors available in the list.")
+					return
+
+				ring_objects = [obj for obj in doc.Objects if obj.Label.startswith("Ring")]
+				if not ring_objects:
+					QtWidgets.QMessageBox.warning(self, "Error", "No objects found with labels starting with 'Ring'.")
+					return
+
+				applied_count = 0
+				for obj in ring_objects:
+					if not hasattr(obj, "ViewObject"):
+						continue
+
+					selected_color = random.choice(self.colors)["color"]
+					r = selected_color.red() / 255.0
+					g = selected_color.green() / 255.0
+					b = selected_color.blue() / 255.0
+					obj.ViewObject.ShapeColor = (r, g, b, 1.0)
+					applied_count += 1
+
 				doc.recompute()
 						
 			def apply_every_x_input_click(self):
@@ -491,10 +535,21 @@ class ApplyColors:
 					self.color_list.addItem(item)
 				
 			def save_colors_to_json(self):
-				"""Save the current list of colors to the JSON file."""
-				# Get the directory of this macro
+				"""Prompt for a filename and save the current list of colors to JSON."""
 				macro_dir = os.path.dirname(os.path.abspath(__file__))
-				colors_file = os.path.join(macro_dir, "ColorListWidget_colors.json")
+				default_file = os.path.join(macro_dir, "ColorListWidget_colors.json")
+				colors_file, _ = QtWidgets.QFileDialog.getSaveFileName(
+					self,
+					"Save Colors",
+					default_file,
+					"JSON Files (*.json);;All Files (*)"
+				)
+
+				if not colors_file:
+					return
+
+				if not colors_file.lower().endswith(".json"):
+					colors_file += ".json"
 				
 				# Build the colors data
 				colors_data = []
@@ -504,21 +559,72 @@ class ApplyColors:
 						"hex": color_entry["color"].name()
 					})
 				
-				# Write to JSON file
+				# Write to JSON file (as a plain list of colors)
 				try:
 					with open(colors_file, 'w') as f:
-						json.dump({"colors": colors_data}, f, indent=2)
-					
-					QtWidgets.QMessageBox.information(
-						self,
-						"Success",
-						f"Saved {len(colors_data)} colors to {os.path.basename(colors_file)}."
-					)
+						json.dump(colors_data, f, indent=2)
 				except Exception as e:
 					QtWidgets.QMessageBox.critical(
 						self,
 						"Error",
 						f"Failed to save colors: {str(e)}"
+					)
+
+			def load_colors_from_json(self):
+				"""Prompt for a JSON file and load a list of colors into the dialog."""
+				macro_dir = os.path.dirname(os.path.abspath(__file__))
+				colors_file, _ = QtWidgets.QFileDialog.getOpenFileName(
+					self,
+					"Load Colors",
+					macro_dir,
+					"JSON Files (*.json);;All Files (*)"
+				)
+
+				if not colors_file:
+					return
+
+				try:
+					with open(colors_file, 'r') as f:
+						data = json.load(f)
+
+					# Support both plain list format and {"colors": [...]} format.
+					if isinstance(data, list):
+						colors_data = data
+					elif isinstance(data, dict):
+						colors_data = data.get("colors", [])
+					else:
+						raise ValueError("Invalid JSON format. Expected a list of color entries.")
+
+					new_colors = []
+					for color_data in colors_data:
+						if not isinstance(color_data, dict):
+							continue
+						color_name = color_data.get("name", "Unnamed Color")
+						hex_color = color_data.get("hex", "#000000")
+						color = QtGui.QColor(hex_color)
+						if not color.isValid():
+							continue
+						new_colors.append({"name": color_name, "color": color})
+
+					self.color_list.clear()
+					self.colors.clear()
+					for color_entry in new_colors:
+						self.colors.append(color_entry)
+						item = QtWidgets.QListWidgetItem()
+						item.setText(color_entry["name"])
+						item.setIcon(self._make_color_icon(color_entry["color"]))
+						self.color_list.addItem(item)
+
+					QtWidgets.QMessageBox.information(
+						self,
+						"Success",
+						f"Loaded {len(self.colors)} colors from {colors_file}."
+					)
+				except Exception as e:
+					QtWidgets.QMessageBox.critical(
+						self,
+						"Error",
+						f"Failed to load colors: {str(e)}"
 					)
 				
 			def apply_color(self):

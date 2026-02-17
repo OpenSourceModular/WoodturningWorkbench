@@ -29,7 +29,8 @@ class WoodturningWorkbench(Gui.Workbench):
 
 	def Initialize(self):
 		from collections import OrderedDict
-		from AddVase import AddVase
+		#from AddVase import AddVase
+		from AddVessel import AddVessel
 		from AddTorus import AddTorus
 		from RotateRings import RotateRings
 		from TaskPanelTemplate import TaskPanelTemplate
@@ -47,7 +48,7 @@ class WoodturningWorkbench(Gui.Workbench):
 		try:
 			workbench_commands = OrderedDict(
 				[	
-					('AddVase', AddVase()),
+					('AddVessel', AddVessel()),
 					('BowlConstructionLines', BowlConstructionLines()),
 					('AddSegments', AddSegments()),
 					('RotateRings', RotateRings()),

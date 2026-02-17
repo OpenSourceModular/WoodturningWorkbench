@@ -15,7 +15,13 @@
 #   write to the Free Software Foundation, Inc., 59 Temple Place,
 #   Suite 330, Boston, MA  02111-1307, USA
 #  
-
+"""
+This module defines the AddSegments command for the Woodturning Workbench in FreeCAD. 
+It provides a task panel interface for creating and manipulating segments of a bowl based on a profile sketch.
+The command allows users to add vessel outlines, create segments, intersect them with a bowl solid, 
+and make adjustments to individual segments. It relies on the presence of a sketch named 'BowlProfileSketch' 
+to generate the segments and bowl solid.
+"""
 import math
 from pydoc import doc
 from sys import prefix
@@ -24,9 +30,13 @@ import FreeCAD as App
 import FreeCADGui as Gui
 from FreeCAD import Vector
 from math import cos, sin, pi, radians, tan
-import PySide.QtGui
-import PySide.QtCore
-import PySide.QtWidgets
+try:
+    from PySide import QtGui, QtCore, QtWidgets
+except ImportError:
+    import importlib
+    QtGui = importlib.import_module("PySide2.QtGui")
+    QtCore = importlib.import_module("PySide2.QtCore")
+    QtWidgets = importlib.import_module("PySide2.QtWidgets")
 import Part
 import Draft
 from BOPTools import BOPFeatures
@@ -34,6 +44,9 @@ from BOPTools import BOPFeatures
 from varsetOps import getVarsetValue, setVarsetValue, getVarsetInt
 
 class AddSegments:
+    '''
+    This class implements the AddSegments command for the Woodturning Workbench in FreeCAD.
+    '''
     
     def GetResources(self):
         """Return the command resources"""
@@ -52,16 +65,13 @@ class AddSegments:
     def Activated(self):
         """Execute the command"""
         class AddSegmentsTaskPanel:
-            #Creates the Task Panel
+            '''This class implements the task panel for the AddSegments command in the Woodturning Workbench.'''
             def __init__(self):
-                
-                from PySide import QtGui, QtCore, QtWidgets	
-
+                '''Initialize the task panel, set up the UI, and define local variables.'''
                 doc = App.activeDocument()
                 self.varset = doc.getObject("BowlVariables")
                 prop_names = self.varset.PropertiesList
                 print(f"Property Names: {prop_names}")
-
                 self.form = QtWidgets.QWidget()
                 self.form.setWindowTitle("Add Segments to Bowl")
                 #Local Variables with Default Values
@@ -83,12 +93,14 @@ class AddSegments:
                 text_box1_layout = QtWidgets.QHBoxLayout()
                 num_segments_label = QtWidgets.QLabel("# of Segments:")
                 self.num_segments_input = QtWidgets.QLineEdit()
+                self.num_segments_input.setToolTip("Number of segments around the bowl")
                 self.num_segments_input.setText(str(self.number_of_segments))
                 self.fudge_input = QtWidgets.QLineEdit()
                 self.fudge_input.setText(str(self.fudge))
                 
                 wall_thickness_label = QtWidgets.QLabel("Wall Thickness:")
                 self.wall_thickness_input = QtWidgets.QLineEdit()
+                self.wall_thickness_input.setToolTip("Wall thickness of the bowl in mm")
                 self.wall_thickness_input.setText(str(self.wall_thickness))
                 text_box1_layout.addWidget(num_segments_label)
                 text_box1_layout.addWidget(self.num_segments_input)
@@ -100,26 +112,21 @@ class AddSegments:
 
                 text_box2_layout.addWidget(QtWidgets.QLabel("Fudge Factor:"))
                 text_box2_layout.addWidget(self.fudge_input)
+                self.fudge_input.setToolTip("Fudge factor in mm")
                 self.solid_bottom_radio = QtGui.QRadioButton("Solid Bottom")
                 text_box2_layout.addWidget(self.solid_bottom_radio)
                 self.solid_bottom_radio.setChecked(True)
-
-                
-
-
-                
                 # Button layout
                 button_layout = QtWidgets.QHBoxLayout()
-                # Add Bowl Outlines button
-                self.add_bowl_outlines_button = QtWidgets.QPushButton("Add Bowl Outlines")
-                self.add_bowl_outlines_button.clicked.connect(self.bt_add_bowl_outlines_click)
-                button_layout.addWidget(self.add_bowl_outlines_button)
-                # Delete Bowl Outlines button
-                self.delete_bowl_outlines_button = QtWidgets.QPushButton("Delete Bowl Outlines")
-                self.delete_bowl_outlines_button.clicked.connect(self.bt_delete_bowl_outlines_click)
-                button_layout.addWidget(self.delete_bowl_outlines_button)
-
-
+                # Add Vessel Outlines button
+                self.add_vessel_outlines_button = QtWidgets.QPushButton("Add Vessel Outlines")
+                self.add_vessel_outlines_button.setToolTip("Add outlines for the Vessel")
+                self.add_vessel_outlines_button.clicked.connect(self.bt_add_vessel_outlines_click)
+                button_layout.addWidget(self.add_vessel_outlines_button)
+                # Delete Vessel Outlines button
+                self.delete_vessel_outlines_button = QtWidgets.QPushButton("Delete Vessel Outlines")
+                self.delete_vessel_outlines_button.clicked.connect(self.bt_delete_vessel_outlines_click)
+                button_layout.addWidget(self.delete_vessel_outlines_button)
                 button_layout2 = QtWidgets.QHBoxLayout()
                 # Add Segments button
                 self.add_segments_button = QtWidgets.QPushButton("Add Segments")
@@ -129,7 +136,6 @@ class AddSegments:
                 self.delete_segments_button = QtWidgets.QPushButton("Delete Segments")
                 self.delete_segments_button.clicked.connect(self.bt_delete_segments_click)
                 button_layout2.addWidget(self.delete_segments_button)
-
 
                 button_layout3 = QtWidgets.QHBoxLayout()
                 # Add Bowl Solid button
@@ -141,7 +147,6 @@ class AddSegments:
                 self.delete_bowl_solid_button.clicked.connect(self.bt_delete_bowl_solid_click)
                 button_layout3.addWidget(self.delete_bowl_solid_button)
 
-
                 button_layout4 = QtWidgets.QHBoxLayout()
                 self.intersect_segments_button = QtWidgets.QPushButton("Intersect Segments")
                 self.intersect_segments_button.clicked.connect(self.bt_intersect_segments_click)
@@ -149,7 +154,6 @@ class AddSegments:
                 self.delete_intersects_button = QtWidgets.QPushButton("Delete Intersect Segments")
                 self.delete_intersects_button.clicked.connect(self.bt_delete_intersects_click)
                 button_layout4.addWidget(self.delete_intersects_button)
-
 
                 button_layout5 = QtWidgets.QHBoxLayout()    
                 # Array segments around ring button
@@ -206,8 +210,6 @@ class AddSegments:
                 layout.addLayout(button_layout3)
                 layout.addLayout(button_layout4)
                 layout.addLayout(button_layout5)
-#                layout.addLayout(button_layout7)
-                   
                 layout.addLayout(button_layout10)
                 
                 # Add stretch at end
@@ -230,7 +232,6 @@ class AddSegments:
             def bt_edit_segment_click(self, radius_type="inner", direcion="decrease"):
                 #print(radius)
                 fudge_adjust = self.fudge_spinbox.value()
-                print("Edit Segment Parameters")
                 import FreeCAD
                 import FreeCADGui
                 doc = FreeCAD.ActiveDocument
@@ -242,11 +243,6 @@ class AddSegments:
                     return
                 seg_name = selected_segment.Label
                 seg_number = int(seg_name.split("_")[1])
-                print(f"Selected segment number: {seg_number}")
-                print(f"Current parameters: {self.list_of_segment_parameters[seg_number]}")
-                
-
-                print(f"New parameters: {self.list_of_segment_parameters[seg_number]}")
                 num_segments = self.list_of_segment_parameters[seg_number][0]
                 radius= self.list_of_segment_parameters[seg_number][1]
                 trapezoid_height = self.list_of_segment_parameters[seg_number][2]
@@ -267,9 +263,6 @@ class AddSegments:
                     else:
                         new_trapezoid_height = self.list_of_segment_parameters[seg_number][2] - (2 * fudge_adjust)
                     self.list_of_segment_parameters[seg_number][2] = new_trapezoid_height
-
-
-
                 doc.removeObject(selected_segment.Name)
                 new_segment = self.make_segment(*self.list_of_segment_parameters[seg_number])
                 print(new_segment)
@@ -280,14 +273,7 @@ class AddSegments:
                 obj.Label = seg_name
                 FreeCADGui.Selection.addSelection(obj)            
 
-            def set_tooltips(self):
-                self.bowl_numSegmentsBox.setToolTip("Number of segments around the bowl")
-                self.bowl_layer_heightBox.setToolTip("Height of each layer in mm")
-                self.bt_add_segments.setToolTip("Add segments to the bowl")	
-                self.bt_delete_segments.setToolTip("Delete all segments created by this macro")
-
             def show_error_popup(self, title, message):
-                from PySide import QtWidgets
                 # Get the main FreeCAD window
                 mw = Gui.getMainWindow()
                 # Create and show the message box
@@ -333,19 +319,14 @@ class AddSegments:
             
             def	bt_add_bowl_solid_click(self):
                 print("Adding Bowl Solid")
-                #import FreeCAD as App
-                #import FreeCADGui as Gui    
                 self.update_values()
                 """Create a BSpline from all point geometries in the selected sketch."""
                 doc = App.activeDocument()
-
                 try:
                     sketch = doc.getObjectsByLabel("BowlProfileSketch")[0]
                 except:
                     self.show_error_popup("Missing Sketch", "A sketch named 'BowlProfileSketch' was not found in the document. Please run the Add Construction Lines command first.")
                     return
-
-
                 # Collect point geometries
                 poles = []
                 list_of_points = []
@@ -359,15 +340,12 @@ class AddSegments:
                 list_of_points.sort(key=lambda v: v.y)
                 for item in list_of_points:
                     poles.append(item)
-
                 if not poles:
                     print(f"No point geometries found in sketch '{sketch.Name}'.")
                     return
-
                 if len(poles) < 2:
                     print("Need at least 2 points to create a BSpline.")
                     return
-
                 # Build BSpline curve from poles
                 try:
                     curve = Part.BSplineCurve()
@@ -376,32 +354,26 @@ class AddSegments:
                 except Exception as e:
                     print(f"Failed to build BSpline: {e}")
                     return
-
                 # Create Part::Feature to hold the result
                 obj_name = f"BSpline_from_{sketch.Name}"
                 bs_obj = doc.addObject("Part::Feature", obj_name)
                 bs_obj.Label = obj_name
                 bs_obj.Shape = shape
-
                 # Try to align placement with the sketch
                 try:
                     if hasattr(sketch, 'Placement'):
                         bs_obj.Placement = sketch.Placement
                 except Exception:
                     pass
-
                 # Create lines from each end of the BSpline to x = 0 (same y,z)
                 try:
                     # shape.Vertexes[0] and [-1] correspond to the start and end vertices of the edge
                     start_pt = shape.Vertexes[0].Point
                     end_pt = shape.Vertexes[-1].Point
-
                     target_start = Vector(0, start_pt.y, start_pt.z)
                     target_end = Vector(0, end_pt.y, end_pt.z)
-
                     edge1 = Part.makeLine(start_pt, target_start)
                     edge2 = Part.makeLine(end_pt, target_end)
-
                     line1 = doc.addObject("Part::Feature", obj_name + "_endline1")
                     line1.Label = obj_name + "_endline1"
                     line1.Shape = edge1
@@ -440,8 +412,6 @@ class AddSegments:
                 except Exception:
                     pass
 
-                
-
                 # Convert the revolve to a solid and hide the original revolve
                 try:
                     if not hasattr(a_revolve, 'Shape') or a_revolve.Shape is None:
@@ -472,26 +442,19 @@ class AddSegments:
                 a_face = faces_list[0]
                 highest_face = -1.0
                 for i, face in enumerate(faces_list):
-                    print(f"Face {i}: Type = {face.ShapeType}, Area = {face.Area}")
-                    print(f"Bounding Box: {face.BoundBox.Center.z}")
                     z_height = face.BoundBox.Center.z
                     if (z_height > highest_face):
                         highest_face = z_height
                         a_face = face
-                        print(f" New highest face: {i} at Z={z_height}")
-                print(a_face)
                 a_thickness = doc.addObject("Part::Thickness","BowlSolid")
                 doc.BowlSolid.Faces = (solid_obj,['Face3',])
                 doc.BowlSolid.Value = -self.wall_thickness
                 solid_obj.Visibility = False
                 a_thickness.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,0,1),90))
                 a_thickness.ViewObject.Transparency = 50
-
                 doc.recompute()				
 
             def	bt_delete_bowl_solid_click(self):
-                
-                print("Deleting Bowl Solid")
                 doc = App.ActiveDocument
                 if doc:
                     for obj in doc.Objects:
@@ -502,7 +465,6 @@ class AddSegments:
                             doc.removeObject(obj.Name)
 
             def	bt_intersect_segments_click(self):
-                
                 doc = App.ActiveDocument		
                 print("Intersecting Segments")
                 bowl_solid_objs = []
@@ -516,14 +478,11 @@ class AddSegments:
                 if len(bowl_solid_objs)>1:
                     print("Multiple BowlSolid objects found. Using the first one.")
                 bowl_solid = bowl_solid_objs[0]
-
                 segment_objs = []
                 for obj in doc.Objects:
                     if "Segment" in obj.Label:
                         segment_objs.append(obj.Label)
                 segment_objs.sort()
-                print(f"Found segment objects: {segment_objs}")
-                
                 if len(segment_objs)==0:
                     print("No Segment objects found for intersection.")
                     return
@@ -557,8 +516,7 @@ class AddSegments:
 
                 doc.recompute()
 
-            def bt_add_bowl_outlines_click(self):
-                print("Adding Bowl Outlines")
+            def bt_add_vessel_outlines_click(self):
                 self.update_values()
                 """Create a BSpline from all point geometries in the selected sketch."""
                 doc = App.activeDocument()
@@ -577,11 +535,9 @@ class AddSegments:
                     if geo.TypeId == 'Part::GeomPoint':
                         #point_count += 1
                         list_of_points.append(App.Vector(geo.X, geo.Y, geo.Z))
-                        print(geo.Y)
                 list_of_points.sort(key=lambda v: v.y)
                 for item in list_of_points:
                     poles.append(item)
-
                 # Build BSpline curve from poles
                 try:
                     curve = Part.BSplineCurve()
@@ -590,13 +546,11 @@ class AddSegments:
                 except Exception as e:
                     print(f"Failed to build BSpline: {e}")
                     return
-
                 # Create Part::Feature to hold the result
                 obj_name = f"BSpline_from_{sketch.Name}"
                 bs_obj = doc.addObject("Part::Feature", obj_name)
                 bs_obj.Label = "Bowl_Outline"
                 bs_obj.Shape = shape
-
                 new_copy = App.ActiveDocument.copyObject(bs_obj, True)
                 new_copy.Label = "Bowl_Outline"
                 new_copy.Placement = App.Placement(App.Vector(-self.wall_thickness,0,0),App.Rotation(App.Vector(1,0,0),90))
@@ -613,20 +567,16 @@ class AddSegments:
                 self.update_values
                 doc = App.ActiveDocument
                 angle = 180 / self.bowl_num_segments
-
                 left_top = -((radius * tan(radians(angle))))
                 right_top = (radius * tan(radians(angle)))
                 left_bottom = -((radius - trapezoid_height) * tan(radians(angle)))
                 right_bottom = ((radius - trapezoid_height) * tan(radians(angle)))
-
                 y_bottom = radius-trapezoid_height
                 y_top = radius
-
                 if solid_bottom:
                     left_bottom = 0
                     right_bottom = 0
                     y_bottom = 0
-
                 vertices = [
                     App.Vector(left_bottom, y_bottom, z_level),
                     App.Vector(right_bottom, y_bottom, z_level),
@@ -637,17 +587,13 @@ class AddSegments:
                 wire = Part.makePolygon(vertices)
                 face = Part.Face(wire)
                 shape = face.extrude(App.Vector(0, 0, extrude_height))
-
                 obj = doc.addObject("Part::Feature", f"Segment_000")
-                
                 obj.Shape = shape
                 return obj.Name 
             
             def bt_add_segments_click(self):
                 doc = App.ActiveDocument
-                print("Adding Segments")
                 self.update_values()
-                
                 try:
                     sketch = doc.getObjectsByLabel("BowlProfileSketch")[0]
                 except:
@@ -661,7 +607,6 @@ class AddSegments:
                     if geo.TypeId == 'Part::GeomPoint':
                         point_count += 1
                         list_of_points.append(App.Vector(geo.X, geo.Y, geo.Z))
-                        print(geo.Y)
                 list_of_points.sort(key=lambda v: v.y)
                 triple_list = []
                 max_x =0
@@ -672,12 +617,10 @@ class AddSegments:
                     m = list_of_points[b].x
                     n = list_of_points[b+1].x-self.wall_thickness
                     o = list_of_points[b+1].x
-                    print(f"b={b} l={l} m={m} n={n} o={o}")
                     max_x = math.ceil(max(l, m, n, o))
                     min_x = math.floor(min(l, m, n, o))
                     a = min_x - (math.cos(math.radians(180/self.bowl_num_segments))*min_x)
                     min_x = math.floor(min_x - a)
-                    print(f"max_x={max_x} min_x={min_x} a={a}")
                     seg_length = max_x - min_x
                     if b==0 and self.solid_bottom:
                         self.list_of_segment_parameters.append([self.number_of_segments, max_x+self.fudge, max_x+self.fudge, list_of_points[b].y, list_of_points[b+1].y-list_of_points[b].y, False])
@@ -721,13 +664,9 @@ class AddSegments:
                     else:
                         print("No active document found.")
 
-            def bt_delete_bowl_outlines_click(self):
-                
-                print("Deleting Bowl Outlines")
+            def bt_delete_vessel_outlines_click(self):
                 if App.ActiveDocument:
-                    print("Objects in the active document:")
                     for obj in App.ActiveDocument.Objects:
-                        print(f"Name: {obj.Name}, Label: {obj.Label}")
                         if "Bowl_Outline" in obj.Label:
                             App.ActiveDocument.removeObject(obj.Name)
                     else:
@@ -747,7 +686,6 @@ class AddSegments:
             
             def getStandardButtons(self):
                 """Define which standard buttons to show (0 = none, we use custom buttons)"""
-                #return int(QtWidgets.QDialogButtonBox.NoButton)
                 return 0
             		
         try:

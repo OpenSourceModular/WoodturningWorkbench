@@ -18,7 +18,13 @@
 from pathlib import Path
 import FreeCAD as App
 import FreeCADGui as Gui
-from PySide import QtGui, QtCore
+try:
+	from PySide import QtGui, QtCore, QtWidgets
+except ImportError:
+	import importlib
+	QtGui = importlib.import_module("PySide2.QtGui")
+	QtCore = importlib.import_module("PySide2.QtCore")
+	QtWidgets = importlib.import_module("PySide2.QtWidgets")
 from FreeCAD import Vector
 import Part
 import Sketcher
@@ -44,7 +50,6 @@ class BowlConstructionLines:
 		"""Execute the command"""
 		class AddBowlConstructionLines:
 
-			from PySide import QtGui, QtCore
 			from FreeCAD import Vector
 
 			#Creates the Dialog Box
@@ -52,7 +57,6 @@ class BowlConstructionLines:
 				#Local Variables with Default Values
 				print("Initializing Bowl Construction Lines GUI")
 				from varsetOps import setVarsetValue, getVarsetValue, getVarsetInt
-				from PySide import QtGui, QtCore, QtWidgets
 				doc = App.activeDocument()
 				self.bowl_height = 254.0  # Bowl height in mm
 				self.bowl_radius = 127.0  # Bowl radius in mm
