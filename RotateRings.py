@@ -37,8 +37,7 @@ class RotateRings:
         """Return the command resources"""
         from pathlib import Path
         return {
-            #'Pixmap': str(Path(App.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "RotateRings.svg"),  
-            'Pixmap':'',
+            'Pixmap': str(Path(App.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "RotateRings.svg"),  
             'MenuText': 'Rotate Rings',
             'ToolTip': 'Rotate Rings Command'
         }
@@ -55,21 +54,13 @@ class RotateRings:
                 
                 from PySide import QtGui, QtCore, QtWidgets	
                 self.form = QtWidgets.QWidget()
-                self.form.setWindowTitle("Task Panel Template")
+                self.form.setWindowTitle("Rotate Rings")
                 #Local Variables with Default Values
                 self.rotation_per_ring = 15
                 self.num_segments = getVarsetInt(self,"NumSegments")   
 
                 # Create layout
                 layout = QtWidgets.QVBoxLayout()
-                
-                # Title
-                title_label = QtWidgets.QLabel("Task Panel Template")
-                title_font = title_label.font()
-                title_font.setPointSize(12)
-                title_font.setBold(True)
-                title_label.setFont(title_font)
-                layout.addWidget(title_label)
 
                 text_box_layout = QtWidgets.QHBoxLayout()
                 

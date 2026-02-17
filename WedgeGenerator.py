@@ -38,10 +38,9 @@ class WedgeGenerator:
         """Return the command resources"""
         from pathlib import Path
         return {
-            #'Pixmap': str(Path(App.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "WedgeGenerator.svg"),  
-            'Pixmap': '',
-            'MenuText': 'Wedge Generator',
-            'ToolTip': 'Wedge Generator Command'
+            'Pixmap': str(Path(App.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "WedgeGenerator.svg"),  
+            'MenuText': 'Wedgie Generator',
+            'ToolTip': 'Wedgie Generator Command'
         }
 
     def IsActive(self):
@@ -56,7 +55,7 @@ class WedgeGenerator:
                 
                 from PySide import QtGui, QtCore, QtWidgets	
                 self.form = QtWidgets.QWidget()
-                self.form.setWindowTitle("Wedge Generator")
+                self.form.setWindowTitle("Wedgie Generator")
                 #Local Variables with Default Values
                 self.wedge_length = 150
                 self.wedge_small_end_width = 50
@@ -70,14 +69,6 @@ class WedgeGenerator:
                 # Create layout
                 layout = QtWidgets.QVBoxLayout()
                 
-                # Title
-                title_label = QtWidgets.QLabel("Wedge Generator")
-                title_font = title_label.font()
-                title_font.setPointSize(12)
-                title_font.setBold(True)
-                title_label.setFont(title_font)
-                layout.addWidget(title_label)
-
                 # Wedge Length
                 wedge_length_layout = QtWidgets.QHBoxLayout()
                 wedge_length_label = QtWidgets.QLabel("Wedge Length:")

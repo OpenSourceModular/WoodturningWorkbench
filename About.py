@@ -88,12 +88,12 @@ class About:
 				layout.setAlignment(QtCore.Qt.AlignCenter)
 				layout.addWidget(self.image_label)
 				self.text_edit = QtWidgets.QTextBrowser(self)
-				html_content = """
-				<h1>Welcome to WoodTurning Workbench</h1>
-				<p>This workbench provides tools for designing and simulating woodturning projects in FreeCAD.</p>
-				<p><a href="https://github.com/OpenSourceModular/WoodTurningWorkbench"</a></p>
+				regular_content = """WoodTurning Workbench is a FreeCAD workbench designed to assist woodturners in creating and simulating their projects. 
+				It provides tools for designing woodturned objects. Created by Justin Ahrens. Email: justin@ahrens.net. GitHub: https://github.com/OpenSourceModular/WoodturningWorkbench
+
 				"""
-				self.text_edit.setHtml(html_content)
+
+				self.text_edit.setPlainText(regular_content)
 				
 				layout.addWidget(self.text_edit)
 

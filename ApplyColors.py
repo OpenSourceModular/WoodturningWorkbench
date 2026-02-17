@@ -72,7 +72,7 @@ class ApplyColors:
 				import FreeCADGui
 				from PySide import QtWidgets, QtCore, QtGui
 				"""Initialize the user interface."""
-				self.setWindowTitle("WoodTurning Workbench Color Dialog")
+				self.setWindowTitle("Apply Colors Dialog")
 				self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
 				#self.setGeometry(100, 100, 400, 500)
 				
@@ -90,10 +90,6 @@ class ApplyColors:
 				self.color_list.itemSelectionChanged.connect(self.on_selection_changed)
 				self.color_list.itemDoubleClicked.connect(self.edit_color)
 				left_layout.addWidget(self.color_list)
-				
-
-
-
 
 				spin_layout = QtWidgets.QHBoxLayout()
 				spin_layout.addWidget(QtWidgets.QLabel("Select every x object:"))

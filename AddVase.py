@@ -57,7 +57,7 @@ class AddVase:
                 from pathlib import Path
                 doc = FreeCAD.activeDocument()	
                 self.form = QtWidgets.QWidget()
-                self.form.setWindowTitle("Import Vase")
+                self.form.setWindowTitle("Import Vessel SVG")
                 #Local Variables with Default Values
                 self.svg_height = 254  # Height to scale the SVG to (mm)
                 self.svg_width = 100  # Width to scale the SVG to (mm), if None it will be scaled proportionally based on height
@@ -80,25 +80,36 @@ class AddVase:
                 # Create layout
                 layout = QtWidgets.QVBoxLayout()
 
-                title_label = QtWidgets.QLabel("Import Vase Parameters")
-                title_font = title_label.font()
-                title_font.setPointSize(12)
-                title_font.setBold(True)
-                title_label.setFont(title_font)
-                layout.addWidget(title_label)
-
-                text_box_layout = QtWidgets.QVBoxLayout()
-                image_y_size_label = QtWidgets.QLabel("Image Height in mm:")
+                text_box_layout = QtWidgets.QHBoxLayout()
+                image_y_size_label = QtWidgets.QLabel("Image Height(mm):")
                 self.image_y_size_input = QtWidgets.QLineEdit()
                 self.image_y_size_input.setText("254")
+                self.image_y_size_input.editingFinished.connect(lambda: self.update_text_boxes('y-mm'))
                 text_box_layout.addWidget(image_y_size_label)
                 text_box_layout.addWidget(self.image_y_size_input)
                 
-                image_x_size_label = QtWidgets.QLabel("Image Width in mm:")
+                image_x_size_label = QtWidgets.QLabel("Image Width(mm):")
                 self.image_x_size_input = QtWidgets.QLineEdit()
                 self.image_x_size_input.setText("100")
+                self.image_x_size_input.editingFinished.connect(lambda: self.update_text_boxes('x-mm'))
                 text_box_layout.addWidget(image_x_size_label)
                 text_box_layout.addWidget(self.image_x_size_input)
+
+
+                text_box2_layout = QtWidgets.QHBoxLayout()
+                image_y_size_in_label = QtWidgets.QLabel("Image Height(in):")
+                self.image_y_size_in_input = QtWidgets.QLineEdit()
+                self.image_y_size_in_input.setText(str(round(self.svg_height / 25.4, 2)))
+                self.image_y_size_in_input.editingFinished.connect(lambda: self.update_text_boxes('y-in'))
+                text_box2_layout.addWidget(image_y_size_in_label)
+                text_box2_layout.addWidget(self.image_y_size_in_input)
+                
+                image_x_size_in_label = QtWidgets.QLabel("Image Width(in):")
+                self.image_x_size_in_input = QtWidgets.QLineEdit()
+                self.image_x_size_in_input.setText(str(round(self.svg_width / 25.4, 2)))
+                self.image_x_size_in_input.editingFinished.connect(lambda: self.update_text_boxes('x-in'))
+                text_box2_layout.addWidget(image_x_size_in_label)
+                text_box2_layout.addWidget(self.image_x_size_in_input)                
                 
                 # Radio buttons for scaling preference
                 scaling_group = QtWidgets.QGroupBox("Scale By:")
@@ -111,9 +122,11 @@ class AddVase:
                 scaling_layout.addWidget(self.scale_by_y_radio)
                 scaling_layout.addWidget(self.scale_by_x_radio)
                 scaling_group.setLayout(scaling_layout)
-                text_box_layout.addWidget(scaling_group)
+                #text_box_layout.addWidget(scaling_group)
                 
                 layout.addLayout(text_box_layout)
+                layout.addLayout(text_box2_layout)
+                layout.addWidget(scaling_group)
 
                 vases_layout = QtWidgets.QHBoxLayout()
                 image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase1.png"
@@ -128,11 +141,8 @@ class AddVase:
                 btn2.setIconSize(QtCore.QSize(48, 48))   # icon display size
                 btn2.clicked.connect(self.bt_click_vase2)					
 
-                vases_layout.addWidget(btn1)
-                vases_layout.addWidget(btn2)
-                layout.addLayout(vases_layout)	
+	
 
-                vases_layout2 = QtWidgets.QHBoxLayout()
                 image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase3.png"
                 btn3 = QtWidgets.QPushButton()
                 btn3.setIcon(QtGui.QIcon(str(image_path)))
@@ -143,28 +153,30 @@ class AddVase:
                 btn4 = QtWidgets.QPushButton()
                 btn4.setIcon(QtGui.QIcon(str(image_path)))
                 btn4.setIconSize(QtCore.QSize(48, 48))   # icon display size
-                btn4.clicked.connect(self.bt_click_vase4)					
+                btn4.clicked.connect(self.bt_click_vase4)
 
-                vases_layout2.addWidget(btn3)
-                vases_layout2.addWidget(btn4)
-                layout.addLayout(vases_layout2)
+                vases_layout.addWidget(btn1)
+                vases_layout.addWidget(btn2)
+                vases_layout.addWidget(btn3)
+                vases_layout.addWidget(btn4)
+                layout.addLayout(vases_layout)
 
-                vases_layout3 = QtWidgets.QHBoxLayout()
+                vases_layout2 = QtWidgets.QHBoxLayout()
                 image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase5.png"
                 btn5 = QtWidgets.QPushButton()
                 btn5.setIcon(QtGui.QIcon(str(image_path)))
                 btn5.setIconSize(QtCore.QSize(48, 48))   # icon display size
                 btn5.clicked.connect(self.bt_click_vase5)
 
-                image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase4.png"
+                image_path = Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "resources" / "vase6.png"
                 btn6 = QtWidgets.QPushButton()
                 btn6.setIcon(QtGui.QIcon(str(image_path)))
                 btn6.setIconSize(QtCore.QSize(48, 48))   # icon display size
-                btn6.clicked.connect(self.bt_click_vase4)					
+                btn6.clicked.connect(self.bt_click_vase6)					
 
                 vases_layout2.addWidget(btn5)
                 vases_layout2.addWidget(btn6)
-                layout.addLayout(vases_layout3)
+                layout.addLayout(vases_layout2)
 
                 # Button layout
                 button_layout = QtWidgets.QHBoxLayout()
@@ -198,7 +210,33 @@ class AddVase:
                 self.svg_width = float(self.image_x_size_input.text()) 
                 self.scale_by_y = self.scale_by_y_radio.isChecked()
 
-                
+            def update_text_boxes(self, source):
+                print("Updating text boxes")
+                print(source)
+                if source == 'y-mm':
+                    try:
+                        self.svg_height = float(self.image_y_size_input.text())
+                        self.image_y_size_in_input.setText(str(round(self.svg_height / 25.4, 2)))
+                    except ValueError:
+                        pass  # Ignore invalid input
+                elif source == 'x-mm':
+                    try:
+                        self.svg_width = float(self.image_x_size_input.text())
+                        self.image_x_size_in_input.setText(str(round(self.svg_width / 25.4, 2)))
+                    except ValueError:
+                        pass  # Ignore invalid input
+                elif source == 'y-in':
+                    try:
+                        self.svg_height = float(self.image_y_size_in_input.text()) * 25.4
+                        self.image_y_size_input.setText(str(round(self.svg_height, 2)))
+                    except ValueError:
+                        pass  # Ignore invalid input
+                elif source == 'x-in':
+                    try:
+                        self.svg_width = float(self.image_x_size_in_input.text()) * 25.4
+                        self.image_x_size_input.setText(str(round(self.svg_width, 2)))
+                    except ValueError:
+                        pass  # Ignore invalid input
             def bt_add_vase_click_it(self):
                 vase_name = "vase1.svg"
                 self.bt_add_vase_clicked(vase_name)
@@ -280,6 +318,8 @@ class AddVase:
                     setVarsetValue(self, "BowlWidth", self.svg_width)
                     self.image_x_size_input.setText(str(round(self.svg_width, 2)))
                     self.image_y_size_input.setText(str(round(self.svg_height, 2)))
+                    self.image_x_size_in_input.setText(str(round(self.svg_width / 25.4, 2)))
+                    self.image_y_size_in_input.setText(str(round(self.svg_height / 25.4, 2)))
                     doc.recompute()
                     Gui.activeDocument().activeView().viewFront()
                     Gui.SendMsgToActiveView("ViewFit")

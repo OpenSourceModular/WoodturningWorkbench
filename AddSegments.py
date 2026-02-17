@@ -80,14 +80,6 @@ class AddSegments:
                         # Create layout
                 layout = QtWidgets.QVBoxLayout()
                 
-                # Title
-                title_label = QtWidgets.QLabel("Bowl Segment Parameters")
-                title_font = title_label.font()
-                title_font.setPointSize(12)
-                title_font.setBold(True)
-                title_label.setFont(title_font)
-                layout.addWidget(title_label)
-
                 text_box1_layout = QtWidgets.QHBoxLayout()
                 num_segments_label = QtWidgets.QLabel("# of Segments:")
                 self.num_segments_input = QtWidgets.QLineEdit()
@@ -102,84 +94,71 @@ class AddSegments:
                 text_box1_layout.addWidget(self.num_segments_input)
                 text_box1_layout.addWidget(wall_thickness_label)
                 text_box1_layout.addWidget(self.wall_thickness_input)
-                layout.addLayout(text_box1_layout)
+                
 
                 text_box2_layout = QtWidgets.QHBoxLayout()
 
                 text_box2_layout.addWidget(QtWidgets.QLabel("Fudge Factor:"))
                 text_box2_layout.addWidget(self.fudge_input)
-                layout.addLayout(text_box2_layout)
-
                 self.solid_bottom_radio = QtGui.QRadioButton("Solid Bottom")
-                layout.addWidget(self.solid_bottom_radio)
+                text_box2_layout.addWidget(self.solid_bottom_radio)
                 self.solid_bottom_radio.setChecked(True)
+
+                
+
+
                 
                 # Button layout
                 button_layout = QtWidgets.QHBoxLayout()
-
                 # Add Bowl Outlines button
                 self.add_bowl_outlines_button = QtWidgets.QPushButton("Add Bowl Outlines")
                 self.add_bowl_outlines_button.clicked.connect(self.bt_add_bowl_outlines_click)
                 button_layout.addWidget(self.add_bowl_outlines_button)
-
                 # Delete Bowl Outlines button
                 self.delete_bowl_outlines_button = QtWidgets.QPushButton("Delete Bowl Outlines")
                 self.delete_bowl_outlines_button.clicked.connect(self.bt_delete_bowl_outlines_click)
                 button_layout.addWidget(self.delete_bowl_outlines_button)
+
 
                 button_layout2 = QtWidgets.QHBoxLayout()
                 # Add Segments button
                 self.add_segments_button = QtWidgets.QPushButton("Add Segments")
                 self.add_segments_button.clicked.connect(self.bt_add_segments_click)
                 button_layout2.addWidget(self.add_segments_button)
-
                 # Delete Segments button
                 self.delete_segments_button = QtWidgets.QPushButton("Delete Segments")
                 self.delete_segments_button.clicked.connect(self.bt_delete_segments_click)
                 button_layout2.addWidget(self.delete_segments_button)
+
 
                 button_layout3 = QtWidgets.QHBoxLayout()
                 # Add Bowl Solid button
                 self.add_bowl_solid_button = QtWidgets.QPushButton("Add Bowl Solid")
                 self.add_bowl_solid_button.clicked.connect(self.bt_add_bowl_solid_click)
                 button_layout3.addWidget(self.add_bowl_solid_button)
-
                 # Delete Bowl Solid button
                 self.delete_bowl_solid_button = QtWidgets.QPushButton("Delete Bowl Solid")
                 self.delete_bowl_solid_button.clicked.connect(self.bt_delete_bowl_solid_click)
                 button_layout3.addWidget(self.delete_bowl_solid_button)
-              
+
+
                 button_layout4 = QtWidgets.QHBoxLayout()
                 self.intersect_segments_button = QtWidgets.QPushButton("Intersect Segments")
                 self.intersect_segments_button.clicked.connect(self.bt_intersect_segments_click)
                 button_layout4.addWidget(self.intersect_segments_button)
-
                 self.delete_intersects_button = QtWidgets.QPushButton("Delete Intersect Segments")
                 self.delete_intersects_button.clicked.connect(self.bt_delete_intersects_click)
                 button_layout4.addWidget(self.delete_intersects_button)
+
 
                 button_layout5 = QtWidgets.QHBoxLayout()    
                 # Array segments around ring button
                 self.array_segments_button = QtWidgets.QPushButton("Make Rings")
                 self.array_segments_button.clicked.connect(self.bt_array_segments_click)
                 button_layout5.addWidget(self.array_segments_button)
-
                 self.array_segments_button = QtWidgets.QPushButton("Delete Arrayed Segments")
                 self.array_segments_button.clicked.connect(self.bt_delete_arrayed_segments_click)
                 button_layout5.addWidget(self.array_segments_button) 
-
-                text_box3_layout = QtWidgets.QHBoxLayout()
-                text_box3_layout.addWidget(QtWidgets.QLabel("Rotation Per Ring:"))
-                self.rotation_input = QtWidgets.QLineEdit()
-                self.rotation_input.setText(str(self.rotation_per_ring))
-                text_box3_layout.addWidget(self.rotation_input)
-
-                button_layout6 = QtWidgets.QHBoxLayout()
-                self.rotate_rings_button = QtWidgets.QPushButton("Rotate Rings")
-                self.rotate_rings_button.clicked.connect(self.bt_rotate_rings_click)
-                button_layout6.addWidget(self.rotate_rings_button)
-
-
 
                 button_layout10 = QtWidgets.QHBoxLayout()	
                 # Cancel button
@@ -191,8 +170,6 @@ class AddSegments:
                 self.expand_inner_radius_button = QtWidgets.QPushButton("Expand Inner")
                 self.expand_inner_radius_button.clicked.connect(self.expand_inner_radius)
                 button_layout7.addWidget(self.expand_inner_radius_button)
-
-                
                 self.expand_outer_radius_button = QtWidgets.QPushButton("Expand Outer")
                 self.expand_outer_radius_button.clicked.connect(self.expand_outer_radius)
                 button_layout7.addWidget(self.expand_outer_radius_button)
@@ -201,7 +178,6 @@ class AddSegments:
                 self.decrease_inner_radius_button = QtWidgets.QPushButton("Decrease Inner")
                 self.decrease_inner_radius_button.clicked.connect(self.decrease_inner_radius)
                 button_layout8.addWidget(self.decrease_inner_radius_button)
-
                 self.decrease_outer_radius_button = QtWidgets.QPushButton("Decrease Outer")
                 self.decrease_outer_radius_button.clicked.connect(self.decrease_outer_radius)
                 button_layout8.addWidget(self.decrease_outer_radius_button)
@@ -211,10 +187,10 @@ class AddSegments:
                 self.fudge_spinbox.setRange(1, 10)
                 self.fudge_spinbox.setSingleStep(1)
                 self.fudge_spinbox.setValue(1)
-                button_layout9.addWidget(QtWidgets.QLabel("Fudge Adjust:"))
+                button_layout9.addWidget(QtWidgets.QLabel("Adjustment Amount:"))
                 button_layout9.addWidget(self.fudge_spinbox)
-                fudge_group = QtWidgets.QGroupBox("Individual Segment Adjustment")
                 
+                fudge_group = QtWidgets.QGroupBox("Individual Segment Adjustment")
                 sub_fudge_layout = QtWidgets.QVBoxLayout()
                 sub_fudge_layout.addWidget(QtWidgets.QLabel("Select one segment to adjust."))
                 sub_fudge_layout.addLayout(button_layout7)
@@ -222,15 +198,16 @@ class AddSegments:
                 sub_fudge_layout.addLayout(button_layout9)
                 fudge_group.setLayout(sub_fudge_layout)
                 
+                layout.addLayout(text_box1_layout)
+                layout.addLayout(text_box2_layout)
                 layout.addLayout(button_layout)
                 layout.addLayout(button_layout2)
+                layout.addWidget(fudge_group) 
                 layout.addLayout(button_layout3)
                 layout.addLayout(button_layout4)
                 layout.addLayout(button_layout5)
-                layout.addLayout(text_box3_layout)                                    
-                layout.addLayout(button_layout6)
-                layout.addLayout(button_layout7)
-                layout.addWidget(fudge_group)    
+#                layout.addLayout(button_layout7)
+                   
                 layout.addLayout(button_layout10)
                 
                 # Add stretch at end
@@ -323,9 +300,7 @@ class AddSegments:
                 self.fudge = float(self.fudge_input.text())
                 self.wall_thickness = float(self.wall_thickness_input.text())
                 setVarsetValue(self, "WallThickness", self.wall_thickness)
-                self.rotation_per_ring = float(self.rotation_input.text())
-                setVarsetValue(self, "RotateAngle", self.rotation_per_ring)
-                
+
                 if self.solid_bottom_radio.isChecked():
                     self.solid_bottom = True
                 else:
@@ -355,35 +330,6 @@ class AddSegments:
                 for obj in doc.Objects:
                     if "Segment" in obj.Label:
                         obj.Visibility = True
-
-            def bt_rotate_rings_click(self):
-                self.update_values()
-                doc = App.ActiveDocument
-                #Ring_001_001
-                print("Rotating Rings")
-                list_of_rings = []
-                prefix = "Ring_"
-                for obj in doc.Objects:
-                    if obj.Label.startswith(prefix):
-                        # Check if the object's label starts with the specified prefix
-                        left_char = obj.Label[:9]
-                        if left_char not in list_of_rings:
-                            list_of_rings.append(left_char)
-                print (list_of_rings)
-                list_of_rings.sort()
-                starting_angle = 0
-                ring_num = 0
-                for ring_name in list_of_rings:
-                    print(ring_name)
-                    for obj in doc.Objects:
-                        if obj.Label.startswith(ring_name):
-                            if obj.Label.endswith("001"):
-                                print(self.rotation_per_ring*ring_num)
-                            obj = doc.getObject(obj.Name)
-                            incremental_rotation = App.Placement(App.Vector(0,0,0), App.Vector(0,0,1), self.rotation_per_ring*ring_num).Rotation
-                            obj.Placement = App.Placement(obj.Placement.Base, incremental_rotation.multiply(obj.Placement.Rotation))
-                    starting_angle = starting_angle - self.rotation_per_ring
-                    ring_num = ring_num + 1
             
             def	bt_add_bowl_solid_click(self):
                 print("Adding Bowl Solid")
@@ -561,7 +507,7 @@ class AddSegments:
                 print("Intersecting Segments")
                 bowl_solid_objs = []
                 for obj in doc.Objects:
-                    if "BowlSolid" in obj.Name:
+                    if "BowlSolid" in obj.Name or "BowlSolid" in obj.Label:
                         bowl_solid_objs.append(obj)
                 
                 if len(bowl_solid_objs)==0:
@@ -727,10 +673,10 @@ class AddSegments:
                     n = list_of_points[b+1].x-self.wall_thickness
                     o = list_of_points[b+1].x
                     print(f"b={b} l={l} m={m} n={n} o={o}")
-                    max_x = max(l, m, n, o)
-                    min_x = min(l, m, n, o)
+                    max_x = math.ceil(max(l, m, n, o))
+                    min_x = math.floor(min(l, m, n, o))
                     a = min_x - (math.cos(math.radians(180/self.bowl_num_segments))*min_x)
-                    min_x = min_x - a
+                    min_x = math.floor(min_x - a)
                     print(f"max_x={max_x} min_x={min_x} a={a}")
                     seg_length = max_x - min_x
                     if b==0 and self.solid_bottom:

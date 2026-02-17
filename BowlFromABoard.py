@@ -168,6 +168,10 @@ class BowlFromABoard:
                 self.generate_bowl.clicked.connect(self.bt_generate_bowl_clicked)
                 button_layout.addWidget(self.generate_bowl)
 
+                self.make_rings = QtWidgets.QPushButton("Make Rings")
+                self.make_rings.clicked.connect(self.bt_make_rings_clicked)
+                button_layout.addWidget(self.make_rings)                
+
                 # Add button A
                 self.button_close = QtWidgets.QPushButton("Close")
                 self.button_close.clicked.connect(self.on_cancel)
@@ -177,6 +181,16 @@ class BowlFromABoard:
                 # Add stretch at end
                 layout.addStretch()
                 self.form.setLayout(layout)
+            def bt_make_rings_clicked(self):
+                self.update_values()
+                doc = App.ActiveDocument
+                
+                self.make_ring(0, 0, self.ring_thickness, self.base_ring_radius, self.slice_angle, "bottom", "Ring0")
+                for i in range(0,self.number_of_rings-2):
+                    a_name = "Ring" + str(i+1)
+                    self.make_ring(self.base_ring_radius+self.ring_width*i, self.ring_thickness*(i+1), self.ring_thickness, self.ring_width, self.slice_angle, "inner", a_name)
+                a_name = "Ring" + str(i+2)
+                self.make_ring(self.base_ring_radius+(self.ring_width*(i+1)), self.ring_thickness*(i+1)+self.ring_thickness, self.ring_thickness, self.ring_width, self.slice_angle, "top", a_name)
 
             def bt_generate_bowl_clicked(self):
                 """Handler for Make Bowl click"""

@@ -18,54 +18,55 @@
 
 import FreeCAD
 import FreeCADGui as Gui	
-from pathlib import Path
-
-from AddVase import AddVase
-from AddTorus import AddTorus
-from RotateRings import RotateRings
-from TaskPanelTemplate import TaskPanelTemplate
-from AddSegments import AddSegments
-from CatenaryCurve import CatenaryCurve
-from BowlConstructionLines import BowlConstructionLines
-from SegmentSpreadsheet import SegmentSpreadsheet
-from BowlFromABoard import BowlFromABoard
-from ApplyColors import ApplyColors
-from About import About
-from WedgeGenerator import WedgeGenerator	
-
-from pathlib import Path
-
-
-# Register commands at module level with error handling
-try:
-	Gui.addCommand('BowlConstructionLines', BowlConstructionLines())
-	Gui.addCommand('AddSegments', AddSegments())
-	Gui.addCommand('CatenaryCurve', CatenaryCurve())
-	Gui.addCommand('SegmentSpreadsheet', SegmentSpreadsheet())
-	Gui.addCommand('RotateRings', RotateRings())
-	Gui.addCommand('BowlFromABoard', BowlFromABoard())
-	Gui.addCommand('AddVase', AddVase())
-	Gui.addCommand('AddTorus', AddTorus())
-	Gui.addCommand('ApplyColors', ApplyColors())
-	Gui.addCommand('WedgeGenerator', WedgeGenerator())
-	Gui.addCommand('About', About())
-	
-
-except Exception as e:
-	FreeCAD.Console.PrintError(f"Error registering commands: {str(e)}\n")
 
 class WoodturningWorkbench(Gui.Workbench):
 	"""Woodturning Workbench class"""
 	from pathlib import Path
+
 	MenuText = "Woodturning Tools"
 	ToolTip = "Tools for woodturning design"
 	Icon = str(Path(FreeCAD.getUserAppDataDir()) / "Mod" / "WoodturningWorkbench" / "icons" / "WT_Bench.svg")
 
 	def Initialize(self):
+		from collections import OrderedDict
+		from AddVase import AddVase
+		from AddTorus import AddTorus
+		from RotateRings import RotateRings
+		from TaskPanelTemplate import TaskPanelTemplate
+		from TopView import TopView
+		from AddSegments import AddSegments
+		from CatenaryCurve import CatenaryCurve
+		from BowlConstructionLines import BowlConstructionLines
+		from SegmentSpreadsheet import SegmentSpreadsheet
+		from BowlFromABoard import BowlFromABoard
+		from ApplyColors import ApplyColors
+		from About import About
+		from WedgeGenerator import WedgeGenerator	
 		"""Initialize the workbench"""
 		# Add commands to toolbar and menu
-		self.appendToolbar("Woodturning Tools", ["AddVase",  "BowlConstructionLines", "AddSegments",  "SegmentSpreadsheet", "RotateRings", "Separator", "BowlFromABoard", "ApplyColors","CatenaryCurve", "WedgeGenerator","AddTorus", "Separator", "About"])
-		self.appendMenu("Woodturning Tools	", ["AddVase", "BowlConstructionLines", "AddSegments", "SegmentSpreadsheet", "RotateRings", "Separator", "BowlFromABoard", "ApplyColors", "CatenaryCurve", "WedgeGenerator","AddTorus", "Separator","About"])
+		try:
+			workbench_commands = OrderedDict(
+				[	
+					('AddVase', AddVase()),
+					('BowlConstructionLines', BowlConstructionLines()),
+					('AddSegments', AddSegments()),
+					('RotateRings', RotateRings()),
+					('ApplyColors', ApplyColors()),
+					('SegmentSpreadsheet', SegmentSpreadsheet()),
+					('TopView', TopView()),
+					('CatenaryCurve', CatenaryCurve()),
+					('BowlFromABoard', BowlFromABoard()),
+					('AddTorus', AddTorus()),
+					('WedgeGenerator', WedgeGenerator()),
+					('About', About())
+				]
+			)	
+			for command_name, command in workbench_commands.items():
+				Gui.addCommand(command_name, command)	
+			self.appendToolbar("Woodturning Tools", list(workbench_commands.keys()))
+			self.appendMenu("Woodturning Tools", list(workbench_commands.keys()))
+		except Exception as e:
+			FreeCAD.Console.PrintError(f"Error registering commands: {str(e)}\n")
 		print("Woodturning Tools Workbench initialized")
 
 	def Activated(self):
@@ -75,6 +76,7 @@ class WoodturningWorkbench(Gui.Workbench):
 	def Deactivated(self):
 		"""Called when the workbench is deactivated"""
 		FreeCAD.Console.PrintMessage("Woodturning Tools Workbench deactivated\n")
+
 	def GetClassName(self):
 		"""Return the class name"""
 		return "Gui::PythonWorkbench"

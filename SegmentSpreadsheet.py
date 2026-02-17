@@ -66,7 +66,7 @@ class SegmentSpreadsheet:
 		print("doc:", doc)
 		print("type(doc):", type(doc))
 		# Create a new spreadsheet
-		spreadsheet = doc.addObject("Spreadsheet::Sheet", "Segment Dimension Spreadsheet")
+		spreadsheet = doc.addObject("Spreadsheet::Sheet", "Cutlist Dimension Spreadsheet")
 		spreadsheet.set("A1", "Vessel Name:")
 		spreadsheet.set("A2", "Vessel Height:")
 		spreadsheet.set("A3", "Vessel Diameter:")
