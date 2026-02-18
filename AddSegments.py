@@ -137,6 +137,11 @@ class AddSegments:
                 self.delete_segments_button.clicked.connect(self.bt_delete_segments_click)
                 button_layout2.addWidget(self.delete_segments_button)
 
+                button_layout2b = QtWidgets.QHBoxLayout()
+                self.array_segments_placeholder_button = QtWidgets.QPushButton("Array Segments")
+                self.array_segments_placeholder_button.clicked.connect(lambda: self.bt_array_segments_click("Segment"))
+                button_layout2b.addWidget(self.array_segments_placeholder_button)
+
                 button_layout3 = QtWidgets.QHBoxLayout()
                 # Add Bowl Solid button
                 self.add_bowl_solid_button = QtWidgets.QPushButton("Add Bowl Solid")
@@ -158,10 +163,10 @@ class AddSegments:
                 button_layout5 = QtWidgets.QHBoxLayout()    
                 # Array segments around ring button
                 self.array_segments_button = QtWidgets.QPushButton("Make Rings")
-                self.array_segments_button.clicked.connect(self.bt_array_segments_click)
+                self.array_segments_button.clicked.connect(lambda: self.bt_array_segments_click("Intersect"))
                 button_layout5.addWidget(self.array_segments_button)
                 self.array_segments_button = QtWidgets.QPushButton("Delete Arrayed Segments")
-                self.array_segments_button.clicked.connect(self.bt_delete_arrayed_segments_click)
+                self.array_segments_button.clicked.connect(lambda: self.bt_array_segments_click("Delete"))
                 button_layout5.addWidget(self.array_segments_button) 
 
                 button_layout10 = QtWidgets.QHBoxLayout()	
@@ -206,6 +211,7 @@ class AddSegments:
                 layout.addLayout(text_box2_layout)
                 layout.addLayout(button_layout)
                 layout.addLayout(button_layout2)
+                layout.addLayout(button_layout2b)
                 layout.addWidget(fudge_group) 
                 layout.addLayout(button_layout3)
                 layout.addLayout(button_layout4)
@@ -634,17 +640,24 @@ class AddSegments:
                     obj.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,0,1),-90))
                     self.list_of_segment_names.append(a_name)
                 print(self.list_of_segment_parameters)
+
+            def bt_array_segments(self):
+                print("Array Segments placeholder")
         
-            def bt_array_segments_click(self):
+            def bt_array_segments_click(self, target):
                 doc = App.ActiveDocument
                 print("Arraying Segments Around Ring")
                 self.update_values()
                 ring_num = 1
+                if target == "Segment":
+                    start_point = 0
+                else:
+                    start_point = 1
                 for obj in doc.Objects:
-                    if "Intersect" in obj.Label:
+                    if target in obj.Label:
                         an_obj = doc.getObject(obj.Name)
                         an_obj.Label =f"Ring_{ring_num:0{3}d}_001"						
-                        for i in range(1, self.bowl_num_segments):
+                        for i in range(start_point, self.bowl_num_segments):
                             angle = i * (360 / self.bowl_num_segments)
                             another_obj = App.ActiveDocument.copyObject(an_obj, True)
                             another_obj.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,0,1),angle))
