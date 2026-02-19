@@ -54,3 +54,10 @@ def setVarsetValue(self, property_name, value):
         setattr(varset, property_name, value)
         return
     print(f"Property {property_name} not found in BowlVariables.")
+
+def setVarsetInt(self, property_name, value):
+    varset = _resolve_varset(self)
+    if varset and property_name in varset.PropertiesList:
+        setattr(varset, property_name, value)
+        return
+    print(f"Property {property_name} not found in BowlVariables.")
