@@ -17,29 +17,40 @@
 # 
 import FreeCAD as App
 
+
+def _resolve_varset(self):
+    if self is not None:
+        if hasattr(self, "PropertiesList"):
+            return self
+        if hasattr(self, "varset"):
+            return self.varset
+    doc = App.activeDocument()
+    return doc.getObject("BowlVariables") if doc else None
+
+
+def _unwrap_value(value):
+    return value.Value if hasattr(value, "Value") else value
+
+
 def getVarsetValue(self, property_name):
-    doc = App.activeDocument()
-    varset = doc.getObject("BowlVariables")
-    print("hey3")
+    varset = _resolve_varset(self)
     if varset and property_name in varset.PropertiesList:
-        print(type(getattr(varset, property_name)))
-        return getattr(varset, property_name).Value
-    else:
-        print(f"Property {property_name} not found in BowlVariables.")
-        return None
+        return _unwrap_value(getattr(varset, property_name))
+    print(f"Property {property_name} not found in BowlVariables.")
+    return None
+
+
 def getVarsetInt(self, property_name):
-    doc = App.activeDocument()
-    varset = doc.getObject("BowlVariables")
-    print("hey2")
+    varset = _resolve_varset(self)
     if varset and property_name in varset.PropertiesList:
-        return getattr(varset, property_name)
-    else:
-        print(f"Property {property_name} not found in BowlVariables.")
-        return None
+        return _unwrap_value(getattr(varset, property_name))
+    print(f"Property {property_name} not found in BowlVariables.")
+    return None
+
+
 def setVarsetValue(self, property_name, value):
-    doc = App.activeDocument()
-    varset = doc.getObject("BowlVariables")
+    varset = _resolve_varset(self)
     if varset and property_name in varset.PropertiesList:
         setattr(varset, property_name, value)
-    else:
-        print(f"Property {property_name} not found in BowlVariables.")
+        return
+    print(f"Property {property_name} not found in BowlVariables.")

@@ -43,6 +43,7 @@ class WoodturningWorkbench(Gui.Workbench):
 		from ApplyColors import ApplyColors
 		from About import About
 		from WedgeGenerator import WedgeGenerator	
+		from OffcenterTurning import OffcenterTurning
 		"""Initialize the workbench"""
 		# Add commands to toolbar and menu
 		try:
@@ -59,6 +60,7 @@ class WoodturningWorkbench(Gui.Workbench):
 					('BowlFromABoard', BowlFromABoard()),
 					('AddTorus', AddTorus()),
 					('WedgeGenerator', WedgeGenerator()),
+					('OffcenterTurning', OffcenterTurning()),
 					('About', About())
 				]
 			)	
