@@ -263,7 +263,6 @@ class ApplyColors:
 			def getVarsetInt(self, property_name):
 				doc = App.activeDocument()
 				varset = doc.getObject("BowlVariables")
-				print("hey2")
 				if varset and property_name in varset.PropertiesList:
 					return getattr(varset, property_name)
 				else:
@@ -272,7 +271,6 @@ class ApplyColors:
 			def getVarsetInt(self, property_name):
 				doc = App.activeDocument()
 				varset = doc.getObject("BowlVariables")
-				print("hey2")
 				if varset and property_name in varset.PropertiesList:
 					return getattr(varset, property_name)
 				else:
@@ -354,7 +352,6 @@ class ApplyColors:
 							reached_end = True
 						if current_segment >= start_segment and reached_end:
 							not_done = False
-						#print(current_segment)
 						current_segment_string = selected_label_prefix + f"{current_segment:03d}"
 						new_selection.append( doc.getObjectsByLabel(current_segment_string)[0] )
 				FreeCADGui.Selection.clearSelection()

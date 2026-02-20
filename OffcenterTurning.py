@@ -92,6 +92,16 @@ class OffcenterTurning:
 
 				text_box_layout = QtWidgets.QVBoxLayout()
 
+				
+				self.bottom_angle_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+				self.bottom_angle_slider.setRange(0, 100) # Set the minimum and maximum values
+				self.bottom_angle_slider.setValue(0) # Set the initial value
+				self.bottom_angle_slider.valueChanged.connect(self.update_slider)
+				self.bottom_angle_label = QtWidgets.QLabel(f"Current Value: {self.bottom_angle_slider.value()}")
+				self.bottom_angle_slider.sliderReleased.connect("self.update_values")
+				text_box_layout.addWidget(self.bottom_angle_label)
+				text_box_layout.addWidget(self.bottom_angle_slider)
+				
 				self.bottom_angle_input = QtWidgets.QLineEdit(str(getVarsetValue(self.varset, "BottomAngle")))
 				self.bottom_angle_input.editingFinished.connect(lambda: self.update_values())
 				self.top_angle_input = QtWidgets.QLineEdit(str(getVarsetValue(self.varset, "TopAngle")))
@@ -175,8 +185,25 @@ class OffcenterTurning:
 				layout.addLayout(button_layout)
 				# Add stretch at end
 				layout.addStretch()
+				self.slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+				self.slider.setRange(0, 100) # Set the minimum and maximum values
+				self.slider.setValue(50) # Set the initial value
+				#self.slider.valueChanged.connect(self.update_slider)
+
+				# Create a label to show the current value
+				self.label = QtWidgets.QLabel(f"Current Value: {self.slider.value()}")
+
+				# Create a layout and add the widgets
+				layout.addWidget(self.label)
+				layout.addWidget(self.slider)
+							
 				self.form.setLayout(layout)
 
+			def update_slider(self, value):
+				sender = self.sender()
+				print(f"Function called by: {sender.text()}")
+				print(value)
+					#self.label.setText(f"Current Value: {value}")
 			def change_num_points(self):
 				sketch = App.ActiveDocument.getObject("Bottom_Sketch")
 				if sketch is not None:
@@ -188,20 +215,6 @@ class OffcenterTurning:
 
 			def bt_delete_clicked(self):
 				doc = App.ActiveDocument
-				'''
-				for obj in doc.Objects:
-					if obj.TypeId == "Part::DatumPlane": 
-						App.ActiveDocument.removeObject(obj.Name)					
-				for obj in doc.Objects:
-					if obj.TypeId == "Part::DatumLine": 
-						App.ActiveDocument.removeObject(obj.Name)	
-				obj = doc.getObject("Bottom_Sketch")
-				if obj:
-					App.ActiveDocument.removeObject(obj.Name)
-				obj = doc.getObject("Top_Sketch")
-				if obj:
-					App.ActiveDocument.removeObject(obj.Name)
-				'''
 				objects_to_remove = []
 				for obj in doc.Objects:
 					objects_to_remove.append(obj)
@@ -210,15 +223,6 @@ class OffcenterTurning:
 				for obj in objects_to_remove:
 					if not obj.Label.startswith("Bowl"):
 						doc.removeObject(obj.Name)
-					
-
-				#for obj in doc.Objects:
-				#	if obj.TypeId == "App::VarSet" and obj.Name == "BowlVariables":
-				#		App.ActiveDocument.removeObject(obj.Name)
-
-			def bt_A_clicked(self):
-				"""Handler for Button A click"""
-				App.Console.PrintMessage("Button A clicked\n")
 
 			def bt_add_sketches_clicked(self):
 				"""Handler for Add Sketches click"""
@@ -374,7 +378,6 @@ class OffcenterTurning:
 
 					if num_points > 1:
 						angle_step_deg = 360.0 / num_points
-						print(f"Adding angle constraints between lines with step of {angle_step_deg} degrees")
 						for i in range(num_points - 1):
 							bottom_sketch.addConstraint(
 								Sketcher.Constraint('Angle', bottom_line_indices[i], bottom_line_indices[i + 1], math.radians(angle_step_deg))
@@ -387,8 +390,6 @@ class OffcenterTurning:
 						if geo.TypeId == "Part::GeomPoint":
 							vertex_index += 1
 							prefix = f";g{i+1}v1"
-							#point_list.append(f"{prefix};Vertex{vertex_index}")
-
 							obj = doc.addObject('Part::DatumLine', 'DatumLine')
 							obj.AttachmentOffset = App.Placement(App.Vector(0, 0, 0), App.Rotation(0, 0, 0))
 							obj.MapReversed = False 
@@ -449,32 +450,7 @@ class OffcenterTurning:
 							new_common = bp.make_multi_common([extrude_list[i]] + [a_cylinder.Name])
 						else:
 							new_common = bp.make_multi_common([extrude_list[i]] + [new_common.Name])
-							
-
-					doc.recompute()
-
-#>>> App.getDocument('Unnamed').addObject('Part::Extrusion','Extrude')
-#>>> f = App.getDocument('Unnamed').getObject('Extrude')
-#>>> f.Base = App.getDocument('Unnamed').getObject('Plane_Sketch001')
-#>>> f.DirMode = "Normal"
-#>>> f.DirLink = None
-#>>> f.LengthFwd = 200.000000000000000
-#>>> f.LengthRev = 0.000000000000000
-#>>> f.Solid = True
-#>>> f.Reversed = True
-#>>> f.Symmetric = False
-#>>> f.TaperAngle = 0.000000000000000
-#>>> f.TaperAngleRev = 0.000000000000000
-#>>> App.getDocument('Unnamed').getObject('Plane_Sketch001').Visibility = False
-#>>> App.ActiveDocument.recompute()
-#>>> # Gui.Selection.clearSelection()
-#>>> # Gui.Selection.addSelection('Unnamed','Extrude')
-#>>> # Gui.ActiveDocument.setEdit(App.getDocument('Unnamed').getObject('Extrude'), 0)
-#>>> FreeCAD.getDocument('Unnamed').getObject('Extrude').LengthFwd = '0 mm'
-								 
 				doc.recompute()
-
-				App.Console.PrintMessage("Created Bottom_Sketch and Top_Sketch.\n")
 
 			def set_tooltips(self):
 				self.bowl_numSegmentsBox.setToolTip("Number of segments around the bowl")
@@ -510,7 +486,6 @@ class OffcenterTurning:
 			
 			def getStandardButtons(self):
 				"""Define which standard buttons to show (0 = none, we use custom buttons)"""
-				#return int(QtWidgets.QDialogButtonBox.NoButton)
 				return 0		
 		try:
 			panel = OffcenterTurningPanel()

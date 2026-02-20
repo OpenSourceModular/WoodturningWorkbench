@@ -71,12 +71,10 @@ class AddSegments:
                 doc = App.activeDocument()
                 self.varset = doc.getObject("BowlVariables")
                 prop_names = self.varset.PropertiesList
-                print(f"Property Names: {prop_names}")
                 self.form = QtWidgets.QWidget()
                 self.form.setWindowTitle("Add Segments to Bowl")
                 #Local Variables with Default Values
                 self.number_of_segments = getVarsetInt(self, "NumSegments")  # Number of segments around the bowl
-                print(self.number_of_segments)
                 self.bowl_height = getVarsetValue(self, "BowlHeight")  # Bowl height in mm
                 self.bowl_radius = getVarsetValue(self, "BowlRadius")  # Bowl radius in mm
                 self.layer_height = getVarsetValue(self, "LayerHeight")  # Layer height in mm
@@ -236,7 +234,6 @@ class AddSegments:
                 self.bt_edit_segment_click(radius_type="outer", direcion="decrease")
 
             def bt_edit_segment_click(self, radius_type="inner", direcion="decrease"):
-                #print(radius)
                 fudge_adjust = self.fudge_spinbox.value()
                 import FreeCAD
                 import FreeCADGui
@@ -271,8 +268,6 @@ class AddSegments:
                     self.list_of_segment_parameters[seg_number][2] = new_trapezoid_height
                 doc.removeObject(selected_segment.Name)
                 new_segment = self.make_segment(*self.list_of_segment_parameters[seg_number])
-                print(new_segment)
-                
                 obj = doc.getObject(new_segment)
                 obj.ViewObject.Transparency = 45
                 obj.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,0,1),-90))   
@@ -300,23 +295,18 @@ class AddSegments:
 
             def bt_delete_arrayed_segments_click(self):
                 doc = App.ActiveDocument
-                print("Deleting Arrayed Segments")
                 for obj in doc.Objects:
                     if "Ring_" in obj.Label:
-                        print(obj.Name)
                         doc.removeObject(obj.Name)
                 for obj in doc.Objects:
                     if "Segment" in obj.Label:
-                        print(obj.Name)
                         obj.Visibility = True
                 doc.recompute()
 
             def bt_delete_intersects_click(self):
                 doc = App.ActiveDocument
-                print("Deleting Intersected Segments")
                 for obj in doc.Objects:
                     if "Intersect" in obj.Label:
-                        print(obj.Name)
                         doc.removeObject(obj.Name)
                 doc.recompute()
                 for obj in doc.Objects:
@@ -324,7 +314,6 @@ class AddSegments:
                         obj.Visibility = True
             
             def	bt_add_bowl_solid_click(self):
-                print("Adding Bowl Solid")
                 self.update_values()
                 """Create a BSpline from all point geometries in the selected sketch."""
                 doc = App.activeDocument()
@@ -342,7 +331,6 @@ class AddSegments:
                     if geo.TypeId == 'Part::GeomPoint':
                         #point_count += 1
                         list_of_points.append(App.Vector(geo.X, geo.Y, geo.Z))
-                        print(geo.Y)
                 list_of_points.sort(key=lambda v: v.y)
                 for item in list_of_points:
                     poles.append(item)
@@ -444,7 +432,6 @@ class AddSegments:
                     print(f"Warning: failed to convert revolve to solid: {e}")
                 a_shape = solid_obj.Shape
                 faces_list = a_shape.Faces
-                print(f"Revolve solid has {len(faces_list)} faces.")
                 a_face = faces_list[0]
                 highest_face = -1.0
                 for i, face in enumerate(faces_list):
@@ -472,7 +459,6 @@ class AddSegments:
 
             def	bt_intersect_segments_click(self):
                 doc = App.ActiveDocument		
-                print("Intersecting Segments")
                 bowl_solid_objs = []
                 for obj in doc.Objects:
                     if "BowlSolid" in obj.Name or "BowlSolid" in obj.Label:
@@ -507,7 +493,6 @@ class AddSegments:
                     intersection_list.append(new_common.Name)
                 doc.recompute()
                 for a in range(0,len(intersection_list)):
-                    print("Making solid:", intersection_list[a])
                     p= doc.getObject(intersection_list[a]).Shape.Faces
                     p = Part.Solid(Part.Shell(p))
                     o = doc.addObject("Part::Feature","Common013_solid")
@@ -639,14 +624,9 @@ class AddSegments:
                     obj.ViewObject.Transparency = 45
                     obj.Placement = App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,0,1),-90))
                     self.list_of_segment_names.append(a_name)
-                print(self.list_of_segment_parameters)
-
-            def bt_array_segments(self):
-                print("Array Segments placeholder")
         
             def bt_array_segments_click(self, target):
                 doc = App.ActiveDocument
-                print("Arraying Segments Around Ring")
                 self.update_values()
                 ring_num = 1
                 if target == "Segment":
@@ -666,12 +646,8 @@ class AddSegments:
                 doc.recompute()
 
             def bt_delete_segments_click(self):
-                
-                print("Deleting Segments")
                 if App.ActiveDocument:
-                    print("Objects in the active document:")
                     for obj in App.ActiveDocument.Objects:
-                        print(f"Name: {obj.Name}, Label: {obj.Label}")
                         if "Segment" in obj.Name:
                             App.ActiveDocument.removeObject(obj.Name)
                     else:

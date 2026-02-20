@@ -197,8 +197,6 @@ class AddVessel:
                 Update text boxes based on the source of the change
                 If a user changes a mm box, update the corresponding inch box and vice versa. Also update internal variables.
                 """
-                print("Updating text boxes")
-                print(source)
                 if source == 'y-mm':
                     try:
                         self.svg_height = float(self.image_y_size_input.text())
@@ -243,7 +241,6 @@ class AddVessel:
                     doc.recompute()
                     
                     for obj in doc.Objects:
-                        print(obj.Name, obj.TypeId)
                         if obj.TypeId == "Image::ImagePlane":
                             vase_obj = obj
                     
@@ -393,7 +390,7 @@ class AddVessel:
                     doc.recompute()
                     Gui.activeDocument().activeView().viewFront()
                     Gui.SendMsgToActiveView("ViewFit")
-                    FreeCAD.Console.PrintMessage("Vase scaled and positioned\n")
+                    
                     
                 except Exception as e:
                     FreeCAD.Console.PrintError(f"Error adding and scaling vase: {str(e)}\n")

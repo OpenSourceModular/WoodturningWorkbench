@@ -55,7 +55,6 @@ class BowlConstructionLines:
 			#Creates the Dialog Box
 			def __init__(self):
 				#Local Variables with Default Values
-				print("Initializing Bowl Construction Lines GUI")
 				from varsetOps import setVarsetValue, getVarsetValue, getVarsetInt
 				doc = App.activeDocument()
 				self.bowl_height = 254.0  # Bowl height in mm
@@ -79,7 +78,6 @@ class BowlConstructionLines:
 					self.varset.addProperty("App::PropertyLength", "WallThickness", "General", "Wall thickness of the bowl")
 					self.varset.WallThickness = 10.0
 				else:
-					print("hey")
 					self.bowl_height = getVarsetValue(self,"BowlHeight")
 					self.layer_height = getVarsetValue(self,"LayerHeight")
 					self.bowl_radius = round(getVarsetValue(self,"BowlWidth") / 2)
@@ -197,7 +195,6 @@ class BowlConstructionLines:
 				self.setVarsetValue("LayerHeight", self.layer_height)
 
 			def update_text_boxes(self, source):
-				print("Updating text boxes")
 				if source == 'layer_height':
 					try:
 						layer_height = float(self.layer_heightBox.text())
@@ -230,9 +227,7 @@ class BowlConstructionLines:
 				#self.update_values()
 
 			def bt_generate_lines_click(self):
-				print("Generating Lines")
 				self.update_values()
-
 				# Get the active document
 				doc = App.activeDocument()
 				if not doc:
@@ -245,9 +240,8 @@ class BowlConstructionLines:
 					sketch = doc.addObject('Sketcher::SketchObject', 'BowlProfileSketch')
 					sketch.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(App.Vector(1, 0, 0), 90))
 					sketch.MapMode = "Deactivated"
-					print("Creating New Sketch")
-
 					self.list_of_points = []
+
 				a_point = sketch.addGeometry(Part.Point(App.Vector(self.bowl_radius/2, 0, 0)), False)
 				self.list_of_points.append(a_point)
 				sketch.addConstraint(Sketcher.Constraint('PointOnObject', a_point, 1, -1))
@@ -259,7 +253,6 @@ class BowlConstructionLines:
 					line_idx = sketch.addGeometry(Part.LineSegment(start, end), False)
 					if(self.construction_lines):
 						sketch.setConstruction(line_idx, True)
-					print(line_idx)
 					sketch.addConstraint(Sketcher.Constraint('Horizontal', line_idx))
 					z = sketch.addConstraint(Sketcher.Constraint('DistanceY', -1, 1 , line_idx, 1, self.layer_height * i))
 					sketch.addConstraint(Sketcher.Constraint('PointOnObject', line_idx, 1, -2))
@@ -270,9 +263,7 @@ class BowlConstructionLines:
 				Gui.SendMsgToActiveView("ViewFit")
 
 			def bt_delete_lines_click(self):
-				print("Deleting Lines")
-				print(self.list_of_points)
-						# Get the active document
+				# Get the active document
 				doc = App.activeDocument()
 				if not doc:
 					show_message("Error", "No active document. Please open a document first.")
@@ -282,8 +273,6 @@ class BowlConstructionLines:
 				sketch = doc.getObject("BowlProfileSketch")
 				geoList = []
 				for i, geo in enumerate(sketch.Geometry):
-					# Print information about the geometry
-					print(f"  Element index {i}: {geo.TypeId}")
 					geoList.append(i)
 				geoList.sort()
 				geoList.reverse()
