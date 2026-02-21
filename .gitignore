@@ -13,8 +13,6 @@ __pycache__/TaskPanelTemplate.cpython-311.pyc
 __pycache__/TopView.cpython-311.pyc
 __pycache__/varsetOps.cpython-311.pyc
 __pycache__/WedgeGenerator.cpython-311.pyc
-__.vscode__/settings.json
-__.vscode__/tasks.json
 __pycache__
-__.vscode__
-
+.vscode/settings.json
+.vscode/tasks.json
